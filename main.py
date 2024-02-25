@@ -115,11 +115,13 @@ tile_images = {
     'comp': load_image('comp.png'),
     'box_bomb': load_image('box_bomb.png'),
     'tool_box': load_image('tool_box.png'),
+    'bomb_image': load_image('bomb.png'),
 }
 player_image = load_image('hero.png')
 bad_robot_image = load_image('bad_robot.png')
 box_bomb_image = load_image('box_bomb.png')
 tool_box_image = load_image('tool_box.png')
+bomb_image = load_image('bomb.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -163,6 +165,14 @@ class ToolBox(pygame.sprite.Sprite):
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
+class Bomb(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(bomb_group, all_sprites)
+        self.image = bomb_image
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+
 def check_step(delta_x, delta_y):
     # print(delta_x, delta_y)
     global x_point_hero, y_point_hero, digit_map
@@ -176,6 +186,25 @@ def check_step(delta_x, delta_y):
             x_point_hero += delta_x
             y_point_hero += delta_y
             digit_map[y_point_hero][x_point_hero] = 5
+            return True
+
+
+def check_step_set_bomb(delta_x, delta_y):
+    # print(delta_x, delta_y)
+    global x_point_hero, y_point_hero, digit_map
+    # print(x_point_hero, y_point_hero)
+    # print(digit_map)
+    if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
+        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x]:
+            return False
+        else:
+            digit_map[y_point_hero][x_point_hero] = 8
+            new_bomb = Bomb(y_point_hero, x_point_hero)
+            x_point_hero += delta_x
+            y_point_hero += delta_y
+            digit_map[y_point_hero][x_point_hero] = 5
+
+
             return True
 
 
@@ -203,7 +232,7 @@ def generate_level(level):
                 new_tool_box = ToolBox(x, y)
 
     # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    return new_player, new_bad_robot, x, y
 
 
 FPS = 50
@@ -234,12 +263,13 @@ if __name__ == '__main__':
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
+    bomb_group = pygame.sprite.Group()
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
     size = width, height = 1200, 800
     screen = pygame.display.set_mode(size)
-    player, level_x, level_y = generate_level(load_level(file_name_level))
+    player, bad_robot, level_x, level_y = generate_level(load_level(file_name_level))
 
     running = True
     while running:
@@ -256,11 +286,45 @@ if __name__ == '__main__':
                     player.rect.y -= step_hero
                 if event.key == pygame.K_DOWN and check_step(0, 1):
                     player.rect.y += step_hero
+                if (event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_CTRL and
+                        check_step_set_bomb(-1, 0)):
+                    print('Left и CTRL')
+                    # new_bomb = Bomb(x_point_hero, y_point_hero)
+                    bad_robot.rect.x -= step_hero
+
+                if (event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_CTRL and
+                        check_step_set_bomb(1, 0)):
+                    print('Right и CTRL')
+                    # new_bomb = Bomb(x_point_hero, y_point_hero)
+                    bad_robot.rect.x += step_hero
+
+                if (event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_CTRL and
+                        check_step_set_bomb(0, -1)):
+                    print('UP и CTRL')
+                    # new_bomb = Bomb(x_point_hero, y_point_hero)
+                    bad_robot.rect.y -= step_hero
+
+                if (event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_CTRL and
+                        check_step_set_bomb(0, 1)):
+                    print('DOWN и CTRL')
+                    # new_bomb = Bomb(x_point_hero, y_point_hero)
+                    bad_robot.rect.y += step_hero
+
+                if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    print('Left и ALT')
+                if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    print('Right и ALT')
+                if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    print('UP и ALT')
+                if event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    print('DOWN и ALT')
+
             if event.type == pygame.QUIT:
                 running = False
         all_sprites.draw(screen)
         all_sprites.update()
         tiles_group.draw(screen)
         player_group.draw(screen)
+        bomb_group.draw(screen)
         pygame.display.flip()
     pygame.quit()
