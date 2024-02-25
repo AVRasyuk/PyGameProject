@@ -84,6 +84,7 @@ def load_level(filename):
                 digit_map[i][j] = 5
                 x_point_hero = j
                 y_point_hero = i
+                print('позиция героя из файла', x_point_hero, y_point_hero)
             elif load_map[i][j] == 'C':
                 digit_map[i][j] = 7
                 x_point_comp = j
@@ -115,13 +116,14 @@ tile_images = {
     'comp': load_image('comp.png'),
     'box_bomb': load_image('box_bomb.png'),
     'tool_box': load_image('tool_box.png'),
-    'bomb_image': load_image('bomb.png'),
+    # 'bomb_image': load_image('bomb.png'),
 }
 player_image = load_image('hero.png')
 bad_robot_image = load_image('bad_robot.png')
 box_bomb_image = load_image('box_bomb.png')
 tool_box_image = load_image('tool_box.png')
 bomb_image = load_image('bomb.png')
+barrier_image = load_image('barrier.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -167,44 +169,80 @@ class ToolBox(pygame.sprite.Sprite):
 
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
+        print(pos_x, pos_y)
         super().__init__(bomb_group, all_sprites)
         self.image = bomb_image
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 0, tile_height * pos_y + 0)
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
-def check_step(delta_x, delta_y):
-    # print(delta_x, delta_y)
+class Barrier(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        print(pos_x, pos_y)
+        super().__init__(barrier_group, all_sprites)
+        self.image = barrier_image
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+
+def check_step(direction):
+    print('вызов check_step')
+    if direction == 'L':
+        delta_x, delta_y = -1, 0
+    elif direction == 'R':
+        delta_x, delta_y = 1, 0
+    elif direction == 'U':
+        delta_x, delta_y = 0, -1
+    elif direction == 'D':
+        delta_x, delta_y = 0, 1
+
     global x_point_hero, y_point_hero, digit_map
-    # print(x_point_hero, y_point_hero)
+    print('шаг стрелкой', x_point_hero, y_point_hero)
     # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
-        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x]:
+        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] != 0:
             return False
-        else:
+        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 0:
             digit_map[y_point_hero][x_point_hero] = 0
+            print('до шага', x_point_hero, y_point_hero)
             x_point_hero += delta_x
             y_point_hero += delta_y
+            print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
             return True
 
 
-def check_step_set_bomb(delta_x, delta_y):
-    # print(delta_x, delta_y)
+def check_step_set(direction, install='еmpty'):
+    print('вызов check_step_set_bomb ')
+    if direction == 'L':
+        delta_x, delta_y = -1, 0
+    elif direction == 'R':
+        delta_x, delta_y = 1, 0
+    elif direction == 'U':
+        delta_x, delta_y = 0, -1
+    elif direction == 'D':
+        delta_x, delta_y = 0, 1
+
     global x_point_hero, y_point_hero, digit_map
-    # print(x_point_hero, y_point_hero)
+    print('шаг стрелкой', x_point_hero, y_point_hero)
     # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x]:
             return False
         else:
-            digit_map[y_point_hero][x_point_hero] = 8
-            new_bomb = Bomb(y_point_hero, x_point_hero)
+            if install == 'bomb':
+                digit_map[y_point_hero][x_point_hero] = 8
+                Bomb(x_point_hero, y_point_hero)
+            if install == 'barrier':
+                digit_map[y_point_hero][x_point_hero] = 3
+                Barrier(x_point_hero, y_point_hero)
+            if install == 'еmpty':
+                digit_map[y_point_hero][x_point_hero] = 0
+
+
+
             x_point_hero += delta_x
             y_point_hero += delta_y
+            print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
-
-
             return True
 
 
@@ -218,6 +256,7 @@ def generate_level(level):
                 Tile('wall', x, y)
             elif level[y][x] == '@':
                 Tile('empty', x, y)
+                print(x, y)
                 new_player = Player(x, y)
             elif level[y][x] == 'C':
                 Tile('comp', x, y)
@@ -264,6 +303,7 @@ if __name__ == '__main__':
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     bomb_group = pygame.sprite.Group()
+    barrier_group = pygame.sprite.Group()
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -277,47 +317,60 @@ if __name__ == '__main__':
         clock.tick(fps)
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
+
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and check_step(-1, 0):
-                    player.rect.x -= step_hero
-                if event.key == pygame.K_RIGHT and check_step(1, 0):
-                    player.rect.x += step_hero
-                if event.key == pygame.K_UP and check_step(0, -1):
-                    player.rect.y -= step_hero
-                if event.key == pygame.K_DOWN and check_step(0, 1):
-                    player.rect.y += step_hero
-                if (event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_CTRL and
-                        check_step_set_bomb(-1, 0)):
-                    print('Left и CTRL')
-                    # new_bomb = Bomb(x_point_hero, y_point_hero)
-                    bad_robot.rect.x -= step_hero
 
-                if (event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_CTRL and
-                        check_step_set_bomb(1, 0)):
-                    print('Right и CTRL')
-                    # new_bomb = Bomb(x_point_hero, y_point_hero)
-                    bad_robot.rect.x += step_hero
+                if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                    print('нажата LEFT + CTRL')
+                    if check_step_set('L', 'bomb'):
+                        player.rect.x -= step_hero
+                elif event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    if check_step_set('L', 'barrier'):
+                        player.rect.x -= step_hero
+                elif event.key == pygame.K_LEFT:
+                    print('нажата LEFT')
+                    if check_step_set('L'):
+                        player.rect.x -= step_hero
 
-                if (event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_CTRL and
-                        check_step_set_bomb(0, -1)):
-                    print('UP и CTRL')
-                    # new_bomb = Bomb(x_point_hero, y_point_hero)
-                    bad_robot.rect.y -= step_hero
+                if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                    print('нажата R + CTRL')
+                    if check_step_set('R', 'bomb'):
+                        player.rect.x += step_hero
+                elif event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    if check_step_set('R', 'barrier'):
+                        player.rect.x += step_hero
+                elif event.key == pygame.K_RIGHT:
+                    print('нажата R')
+                    if check_step_set('R'):
+                        player.rect.x += step_hero
 
-                if (event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_CTRL and
-                        check_step_set_bomb(0, 1)):
-                    print('DOWN и CTRL')
-                    # new_bomb = Bomb(x_point_hero, y_point_hero)
-                    bad_robot.rect.y += step_hero
+                if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                    print('нажата UP + CTRL')
+                    if check_step_set('U', 'bomb'):
+                        player.rect.y -= step_hero
+                elif event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    if check_step_set('U', 'barrier'):
+                        player.rect.y -= step_hero
+                elif event.key == pygame.K_UP:
+                    print('нажата UP')
+                    if check_step_set('U'):
+                        player.rect.y -= step_hero
 
-                if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    print('Left и ALT')
-                if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    print('Right и ALT')
-                if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    print('UP и ALT')
-                if event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    print('DOWN и ALT')
+                if event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                    print('нажата DOWN + CTRL')
+                    if check_step_set('D', 'bomb'):
+                        player.rect.y += step_hero
+                elif event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    if check_step_set('D', 'barrier'):
+                        player.rect.y += step_hero
+                elif event.key == pygame.K_DOWN:
+                    print('нажата DOWN')
+                    if check_step_set('D'):
+                        player.rect.y += step_hero
+
+                player_group.draw(screen)
+                bomb_group.draw(screen)
+                barrier_group.draw(screen)
 
             if event.type == pygame.QUIT:
                 running = False
@@ -326,5 +379,6 @@ if __name__ == '__main__':
         tiles_group.draw(screen)
         player_group.draw(screen)
         bomb_group.draw(screen)
+        barrier_group.draw(screen)
         pygame.display.flip()
     pygame.quit()
