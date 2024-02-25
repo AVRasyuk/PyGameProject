@@ -96,6 +96,11 @@ def load_level(filename):
                 digit_map[i][j] = 8
                 x_point_box_bomb = j
                 y_point_box_bomb = i
+            elif load_map[i][j] == 'T':
+                digit_map[i][j] = 4
+                x_point_tool_box = j
+                y_point_tool_box = i
+
     # print(x_point_hero, y_point_hero)
     # print(digit_map)
     # print(digit_map)
@@ -107,10 +112,14 @@ def load_level(filename):
 tile_images = {
     'wall': load_image('wall.png'),
     'empty': load_image('hex.png'),
-    'comp' : load_image('comp.png')
+    'comp': load_image('comp.png'),
+    'box_bomb': load_image('box_bomb.png'),
+    'tool_box': load_image('tool_box.png'),
 }
 player_image = load_image('hero.png')
 bad_robot_image = load_image('bad_robot.png')
+box_bomb_image = load_image('box_bomb.png')
+tool_box_image = load_image('tool_box.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -129,6 +138,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
+
 class BadRobot(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
@@ -136,6 +146,21 @@ class BadRobot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
+
+class BoxBomb(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = box_bomb_image
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+
+class ToolBox(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = tool_box_image
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
 def check_step(delta_x, delta_y):
@@ -167,9 +192,15 @@ def generate_level(level):
                 new_player = Player(x, y)
             elif level[y][x] == 'C':
                 Tile('comp', x, y)
+            elif level[y][x] == 'B':
+                Tile('empty', x, y)
+                new_box_bomb = BoxBomb(x, y)
             elif level[y][x] == 'R':
                 Tile('empty', x, y)
                 new_bad_robot = BadRobot(x, y)
+            elif level[y][x] == 'T':
+                Tile('empty', x, y)
+                new_tool_box = ToolBox(x, y)
 
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
