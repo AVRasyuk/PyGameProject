@@ -67,12 +67,15 @@ def load_level(filename):
     global x_point_hero, y_point_hero, digit_map
     # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
+    max_highth = len(level_map)
+    print(max_width, max_highth)
     load_map = list(map(lambda x: x.ljust(max_width, '.'), level_map))
-    digit_map = [[0] * (max_width) for _ in range(max_width)]
+    print(load_map)
+    digit_map = [[0] * (max_width) for _ in range(max_highth)]
     # print(digit_map)
 
     for j in range(max_width):
-        for i in range(max_width):
+        for i in range(max_highth):
             if load_map[i][j] == '.':
                 digit_map[i][j] = 0
             elif load_map[i][j] == '#':
@@ -81,6 +84,18 @@ def load_level(filename):
                 digit_map[i][j] = 5
                 x_point_hero = j
                 y_point_hero = i
+            elif load_map[i][j] == 'C':
+                digit_map[i][j] = 7
+                x_point_comp = j
+                y_point_comp = i
+            elif load_map[i][j] == 'R':
+                digit_map[i][j] = 6
+                x_point_bad_robot = j
+                y_point_bad_robot = i
+            elif load_map[i][j] == 'B':
+                digit_map[i][j] = 8
+                x_point_box_bomb = j
+                y_point_box_bomb = i
     # print(x_point_hero, y_point_hero)
     # print(digit_map)
     # print(digit_map)
@@ -90,10 +105,12 @@ def load_level(filename):
 
 
 tile_images = {
-    'wall': load_image('box.png'),
-    'empty': load_image('grass.png')
+    'wall': load_image('wall.png'),
+    'empty': load_image('hex.png'),
+    'comp' : load_image('comp.png')
 }
-player_image = load_image('mario.png')
+player_image = load_image('hero.png')
+bad_robot_image = load_image('bad_robot.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -111,6 +128,14 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+class BadRobot(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = bad_robot_image
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 0, tile_height * pos_y + 0)
+
 
 
 def check_step(delta_x, delta_y):
@@ -140,6 +165,12 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
+            elif level[y][x] == 'C':
+                Tile('comp', x, y)
+            elif level[y][x] == 'R':
+                Tile('empty', x, y)
+                new_bad_robot = BadRobot(x, y)
+
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
