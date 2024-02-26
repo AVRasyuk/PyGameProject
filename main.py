@@ -59,46 +59,55 @@ def start_screen():
 
 
 def load_level(filename):
+    global max_width, max_height
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
         # print(level_map)
-    global x_point_hero, y_point_hero, digit_map
+    global x_point_hero, y_point_hero, digit_map, bad_robot_map, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp
     # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
-    max_highth = len(level_map)
-    print(max_width, max_highth)
+    max_height = len(level_map)
+    print(max_width, max_height)
     load_map = list(map(lambda x: x.ljust(max_width, '.'), level_map))
     print(load_map)
-    digit_map = [[0] * (max_width) for _ in range(max_highth)]
+    digit_map = [[0] * (max_width) for _ in range(max_height)]
+    bad_robot_map = [[0] * (max_width) for _ in range(max_height)]
     # print(digit_map)
 
     for j in range(max_width):
-        for i in range(max_highth):
+        for i in range(max_height):
             if load_map[i][j] == '.':
                 digit_map[i][j] = 0
+                bad_robot_map[i][j] = 0
             elif load_map[i][j] == '#':
                 digit_map[i][j] = 1
+                bad_robot_map[i][j] = 1
             elif load_map[i][j] == '@':
                 digit_map[i][j] = 5
+                bad_robot_map[i][j] = 0
                 x_point_hero = j
                 y_point_hero = i
                 print('позиция героя из файла', x_point_hero, y_point_hero)
             elif load_map[i][j] == 'C':
                 digit_map[i][j] = 7
+                bad_robot_map[i][j] = 0
                 x_point_comp = j
                 y_point_comp = i
             elif load_map[i][j] == 'R':
                 digit_map[i][j] = 6
+                bad_robot_map[i][j] = 0
                 x_point_bad_robot = j
                 y_point_bad_robot = i
             elif load_map[i][j] == 'B':
                 digit_map[i][j] = 8
+                bad_robot_map[i][j] = 1
                 x_point_box_bomb = j
                 y_point_box_bomb = i
             elif load_map[i][j] == 'T':
                 digit_map[i][j] = 4
+                bad_robot_map[i][j] = 1
                 x_point_tool_box = j
                 y_point_tool_box = i
 
@@ -183,34 +192,34 @@ class Barrier(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
-def check_step(direction):
-    print('вызов check_step')
-    if direction == 'L':
-        delta_x, delta_y = -1, 0
-    elif direction == 'R':
-        delta_x, delta_y = 1, 0
-    elif direction == 'U':
-        delta_x, delta_y = 0, -1
-    elif direction == 'D':
-        delta_x, delta_y = 0, 1
+# def check_step(direction):
+#     print('вызов check_step')
+#     if direction == 'L':
+#         delta_x, delta_y = -1, 0
+#     elif direction == 'R':
+#         delta_x, delta_y = 1, 0
+#     elif direction == 'U':
+#         delta_x, delta_y = 0, -1
+#     elif direction == 'D':
+#         delta_x, delta_y = 0, 1
+#
+#     global x_point_hero, y_point_hero, digit_map
+#     print('шаг стрелкой', x_point_hero, y_point_hero)
+#     # print(digit_map)
+#     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
+#         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] != 0:
+#             return False
+#         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 0:
+#             digit_map[y_point_hero][x_point_hero] = 0
+#             print('до шага', x_point_hero, y_point_hero)
+#             x_point_hero += delta_x
+#             y_point_hero += delta_y
+#             print('после шага', x_point_hero, y_point_hero)
+#             digit_map[y_point_hero][x_point_hero] = 5
+#             return True
 
-    global x_point_hero, y_point_hero, digit_map
-    print('шаг стрелкой', x_point_hero, y_point_hero)
-    # print(digit_map)
-    if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
-        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] != 0:
-            return False
-        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 0:
-            digit_map[y_point_hero][x_point_hero] = 0
-            print('до шага', x_point_hero, y_point_hero)
-            x_point_hero += delta_x
-            y_point_hero += delta_y
-            print('после шага', x_point_hero, y_point_hero)
-            digit_map[y_point_hero][x_point_hero] = 5
-            return True
 
-
-def check_step_set(direction, install='еmpty'):
+def check_step_set_hero(direction, install='еmpty'):
     print('вызов check_step_set_bomb ')
     if direction == 'L':
         delta_x, delta_y = -1, 0
@@ -221,7 +230,7 @@ def check_step_set(direction, install='еmpty'):
     elif direction == 'D':
         delta_x, delta_y = 0, 1
 
-    global x_point_hero, y_point_hero, digit_map
+    global x_point_hero, y_point_hero, digit_map, bad_robot_map
     print('шаг стрелкой', x_point_hero, y_point_hero)
     # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
@@ -233,16 +242,17 @@ def check_step_set(direction, install='еmpty'):
                 Bomb(x_point_hero, y_point_hero)
             if install == 'barrier':
                 digit_map[y_point_hero][x_point_hero] = 3
+                bad_robot_map[y_point_hero][x_point_hero] = 3
                 Barrier(x_point_hero, y_point_hero)
             if install == 'еmpty':
                 digit_map[y_point_hero][x_point_hero] = 0
-
-
+                bad_robot_map[y_point_hero][x_point_hero] = 0
 
             x_point_hero += delta_x
             y_point_hero += delta_y
             print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
+            bad_robot_map[y_point_hero][x_point_hero] = 0
             return True
 
 
@@ -274,10 +284,73 @@ def generate_level(level):
     return new_player, new_bad_robot, x, y
 
 
+def has_path(x1, y1, x2, y2):
+    d = get_distance(x1, y1)
+    # print('дистанция в has_path', d)
+    dist = d.get((x2, y2), -1)
+    return dist >= 0
+
+
+def get_distance(start_x_point, start_y_point):
+    global max_width, max_height, bad_robot_map
+    print('bad robot map', bad_robot_map)
+    print('ширина высота поля', max_width, max_height)
+
+    v = [(start_x_point, start_y_point)]
+    d = {(start_x_point, start_y_point): 0}
+    while len(v) > 0:
+        x, y = v.pop(0)
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                if dx * dy != 0:
+                    continue
+                if x + dx < 0 or x + dx >= max_width or y + dy < 0 or y + dy >= max_height:
+                    continue
+                # print(y + dy, x + dx)
+                if bad_robot_map[y + dy][x + dx] == 0:
+                    dn = d.get((x + dx, y + dy), -1)
+                    if dn == -1:
+                        d[(x + dx, y + dy)] = d[(x, y)] + 1
+                        v.append((x + dx, y + dy))
+    print('дистанция - ', d)
+    return d
+
+
+def get_path(x1, y1, x2, y2):
+    global max_width, max_height, bad_robot_move_path
+    d = get_distance(x1, y1)
+    v = x2, y2
+    path = [v]
+    while v != (x1, y1):
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                if dx * dy != 0 or (dx == 0 and dy == 0):
+                    continue
+                x = v[0]
+                y = v[1]
+                if x + dx < 0 or x + dx >= max_width or \
+                        y + dy < 0 or y + dy >= max_height:
+                    continue
+                if d.get((x + dx, y + dy), -100) == d[v] - 1:
+                    v = (x + dx, y + dy)
+                    path.append(v)
+    path.reverse()
+    bad_robot_move_path = path[:]
+    # print('путь выхода - ', path)
+    if len(path) > 1:
+        pass
+        # self.start_draw_path_ball = True
+
+    return path[:]
+
+
 FPS = 50
 x_point_hero = 0
 y_point_hero = 0
-digit_map = [[]]
+x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
+bad_robot_move_path = []
+bad_robot_map, digit_map = [[]], [[]]
+board = [[]]
 clock = pygame.time.Clock()
 
 if __name__ == '__main__':
@@ -322,50 +395,50 @@ if __name__ == '__main__':
 
                 if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата LEFT + CTRL')
-                    if check_step_set('L', 'bomb'):
+                    if check_step_set_hero('L', 'bomb'):
                         player.rect.x -= step_hero
                 elif event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    if check_step_set('L', 'barrier'):
+                    if check_step_set_hero('L', 'barrier'):
                         player.rect.x -= step_hero
                 elif event.key == pygame.K_LEFT:
                     print('нажата LEFT')
-                    if check_step_set('L'):
+                    if check_step_set_hero('L'):
                         player.rect.x -= step_hero
 
                 if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата R + CTRL')
-                    if check_step_set('R', 'bomb'):
+                    if check_step_set_hero('R', 'bomb'):
                         player.rect.x += step_hero
                 elif event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    if check_step_set('R', 'barrier'):
+                    if check_step_set_hero('R', 'barrier'):
                         player.rect.x += step_hero
                 elif event.key == pygame.K_RIGHT:
                     print('нажата R')
-                    if check_step_set('R'):
+                    if check_step_set_hero('R'):
                         player.rect.x += step_hero
 
                 if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата UP + CTRL')
-                    if check_step_set('U', 'bomb'):
+                    if check_step_set_hero('U', 'bomb'):
                         player.rect.y -= step_hero
                 elif event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    if check_step_set('U', 'barrier'):
+                    if check_step_set_hero('U', 'barrier'):
                         player.rect.y -= step_hero
                 elif event.key == pygame.K_UP:
                     print('нажата UP')
-                    if check_step_set('U'):
+                    if check_step_set_hero('U'):
                         player.rect.y -= step_hero
 
                 if event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата DOWN + CTRL')
-                    if check_step_set('D', 'bomb'):
+                    if check_step_set_hero('D', 'bomb'):
                         player.rect.y += step_hero
                 elif event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_ALT:
-                    if check_step_set('D', 'barrier'):
+                    if check_step_set_hero('D', 'barrier'):
                         player.rect.y += step_hero
                 elif event.key == pygame.K_DOWN:
                     print('нажата DOWN')
-                    if check_step_set('D'):
+                    if check_step_set_hero('D'):
                         player.rect.y += step_hero
 
                 player_group.draw(screen)
@@ -374,6 +447,21 @@ if __name__ == '__main__':
 
             if event.type == pygame.QUIT:
                 running = False
+        # if start_find_path:
+        print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
+        print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
+        if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
+            path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
+
+            for step in path[1:]:
+                for j in range(max_height):
+                    for i in range(max_width):
+                        x_step, y_step = step
+                        if x_step == i and y_step == j:
+                            Bomb(i,j)
+
+        print(path)
+
         all_sprites.draw(screen)
         all_sprites.update()
         tiles_group.draw(screen)
