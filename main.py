@@ -56,26 +56,44 @@ def start_screen():
 
         pygame.display.flip()
         clock.tick(FPS)
-def info_line():
 
+
+def info_line():
     fon = pygame.transform.scale(load_image('info_line_fon.png'), (1200, 50))
     screen.blit(fon, (0, 800))
-    wall = pygame.transform.scale(load_image('wall.png'), (30, 30))
-    screen.blit(wall, (50, 810))
     font = pygame.font.Font(None, 30)
+    bomb = pygame.transform.scale(load_image('bomb.png'), (30, 30))
+    screen.blit(bomb, (70, 810))
     text_coord = 810
-    string_rendered = font.render('Стенки:', 1, pygame.Color('red'))
+    string_rendered = font.render('(ctrl) Бомбы:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 100
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
-    bomb = pygame.transform.scale(load_image('bomb.png'), (30, 30))
-    screen.blit(bomb, (250, 810))
-    font = pygame.font.Font(None, 30)
-    text_coord = 810
-    string_rendered = font.render('Бомбы:', 1, pygame.Color('red'))
+
+    barrier = pygame.transform.scale(load_image('wall.png'), (30, 30))
+    screen.blit(barrier, (360, 810))
+    string_rendered = font.render('(alt) Препятствия:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 300
+    intro_rect.x = 400
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+
+
+
+def info_line_update(wall_count, bomb_count):
+    text_coord = 805
+    font = pygame.font.Font(None, 40)
+    text_bomb_count = str(bomb_count)
+    string_rendered = font.render(text_bomb_count, 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 240
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+    text_wall_count = str(wall_count)
+    string_rendered = font.render(text_wall_count, 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 590
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
@@ -252,12 +270,13 @@ def check_step_set_hero(direction, install='еmpty'):
     elif direction == 'D':
         delta_x, delta_y = 0, 1
 
-    global x_point_hero, y_point_hero, digit_map, bad_robot_map
+    global x_point_hero, y_point_hero, digit_map, bad_robot_map, bomb_count, barrier_count
     print('шаг стрелкой', x_point_hero, y_point_hero)
     # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 4:
             tool_box_group.empty()
+            barrier_count = 20
             digit_map[y_point_hero][x_point_hero] = 0
             x_point_hero += delta_x
             y_point_hero += delta_y
@@ -267,6 +286,7 @@ def check_step_set_hero(direction, install='еmpty'):
             return True
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 8:
             bomb_box_group.empty()
+            bomb_count = 5
             digit_map[y_point_hero][x_point_hero] = 0
             x_point_hero += delta_x
             y_point_hero += delta_y
@@ -274,21 +294,26 @@ def check_step_set_hero(direction, install='еmpty'):
             digit_map[y_point_hero][x_point_hero] = 5
             bad_robot_map[y_point_hero][x_point_hero] = 0
             return True
-
-
-
-
-
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x]:
             return False
         else:
             if install == 'bomb':
-                digit_map[y_point_hero][x_point_hero] = 8
-                Bomb(x_point_hero, y_point_hero)
+                if bomb_count > 0:
+                    digit_map[y_point_hero][x_point_hero] = 9
+                    bomb_count -= 1
+                    Bomb(x_point_hero, y_point_hero)
+                else:
+                    digit_map[y_point_hero][x_point_hero] = 0
+                    bad_robot_map[y_point_hero][x_point_hero] = 0
             if install == 'barrier':
-                digit_map[y_point_hero][x_point_hero] = 3
-                bad_robot_map[y_point_hero][x_point_hero] = 3
-                Barrier(x_point_hero, y_point_hero)
+                if barrier_count > 0:
+                    digit_map[y_point_hero][x_point_hero] = 3
+                    barrier_count -= 1
+                    bad_robot_map[y_point_hero][x_point_hero] = 3
+                    Barrier(x_point_hero, y_point_hero)
+                else:
+                    digit_map[y_point_hero][x_point_hero] = 0
+                    bad_robot_map[y_point_hero][x_point_hero] = 0
             if install == 'еmpty':
                 digit_map[y_point_hero][x_point_hero] = 0
                 bad_robot_map[y_point_hero][x_point_hero] = 0
@@ -397,6 +422,7 @@ FPS = 50
 x_point_hero = 0
 y_point_hero = 0
 x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
+bomb_count, barrier_count = 0, 0
 bad_robot_move_path = []
 bad_robot_map, digit_map = [[]], [[]]
 board = [[]]
@@ -496,8 +522,8 @@ if __name__ == '__main__':
 
                 if event.key == pygame.K_d:
                     print('нажата клавиша d')
-                    #all_sprites.remove(new_tool_box)
-                    #tool_box_group.remove(new_tool_box)
+                    # all_sprites.remove(new_tool_box)
+                    # tool_box_group.remove(new_tool_box)
                     print(tool_box_group)
                     tool_box_group.empty()
                     print(tool_box_group)
@@ -525,7 +551,7 @@ if __name__ == '__main__':
                             # Bomb(i,j)
 
         # print(path)
-
+        info_line_update(barrier_count, bomb_count)
         all_sprites.draw(screen)
         all_sprites.update()
         tiles_group.draw(screen)
