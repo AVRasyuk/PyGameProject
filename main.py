@@ -103,8 +103,8 @@ def load_level(filename):
             elif load_map[i][j] == 'B':
                 digit_map[i][j] = 8
                 bad_robot_map[i][j] = 1
-                x_point_box_bomb = j
-                y_point_box_bomb = i
+                x_point_bomb_box = j
+                y_point_bomb_box = i
             elif load_map[i][j] == 'T':
                 digit_map[i][j] = 4
                 bad_robot_map[i][j] = 1
@@ -160,9 +160,9 @@ class BadRobot(pygame.sprite.Sprite):
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
-class BoxBomb(pygame.sprite.Sprite):
+class BombBox(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
+        super().__init__(bomb_box_group, all_sprites)
         self.image = box_bomb_image
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
@@ -170,7 +170,7 @@ class BoxBomb(pygame.sprite.Sprite):
 
 class ToolBox(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
+        super().__init__(tool_box_group, all_sprites)
         self.image = tool_box_image
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
@@ -178,7 +178,7 @@ class ToolBox(pygame.sprite.Sprite):
 
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        print(pos_x, pos_y)
+        # print(pos_x, pos_y)
         super().__init__(bomb_group, all_sprites)
         self.image = bomb_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
@@ -234,6 +234,29 @@ def check_step_set_hero(direction, install='еmpty'):
     print('шаг стрелкой', x_point_hero, y_point_hero)
     # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
+        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 4:
+            tool_box_group.empty()
+            digit_map[y_point_hero][x_point_hero] = 0
+            x_point_hero += delta_x
+            y_point_hero += delta_y
+            print('после шага', x_point_hero, y_point_hero)
+            digit_map[y_point_hero][x_point_hero] = 5
+            bad_robot_map[y_point_hero][x_point_hero] = 0
+            return True
+        if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 8:
+            bomb_box_group.empty()
+            digit_map[y_point_hero][x_point_hero] = 0
+            x_point_hero += delta_x
+            y_point_hero += delta_y
+            print('после шага', x_point_hero, y_point_hero)
+            digit_map[y_point_hero][x_point_hero] = 5
+            bad_robot_map[y_point_hero][x_point_hero] = 0
+            return True
+
+
+
+
+
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x]:
             return False
         else:
@@ -272,13 +295,17 @@ def generate_level(level):
                 Tile('comp', x, y)
             elif level[y][x] == 'B':
                 Tile('empty', x, y)
-                new_box_bomb = BoxBomb(x, y)
+                # new_box_bmb =
+                bomb_box_group.add(BombBox(x, y))
             elif level[y][x] == 'R':
                 Tile('empty', x, y)
                 new_bad_robot = BadRobot(x, y)
             elif level[y][x] == 'T':
                 Tile('empty', x, y)
-                new_tool_box = ToolBox(x, y)
+                # new_tool_box = ToolBox(x, y)
+                # all_sprites.add(new_tool_box)
+                # all_sprites.add(ToolBox(x, y))
+                tool_box_group.add(ToolBox(x, y))
 
     # вернем игрока, а также размер поля в клетках
     return new_player, new_bad_robot, x, y
@@ -293,8 +320,8 @@ def has_path(x1, y1, x2, y2):
 
 def get_distance(start_x_point, start_y_point):
     global max_width, max_height, bad_robot_map
-    print('bad robot map', bad_robot_map)
-    print('ширина высота поля', max_width, max_height)
+    # print('bad robot map', bad_robot_map)
+    # print('ширина высота поля', max_width, max_height)
 
     v = [(start_x_point, start_y_point)]
     d = {(start_x_point, start_y_point): 0}
@@ -312,7 +339,7 @@ def get_distance(start_x_point, start_y_point):
                     if dn == -1:
                         d[(x + dx, y + dy)] = d[(x, y)] + 1
                         v.append((x + dx, y + dy))
-    print('дистанция - ', d)
+    # print('дистанция - ', d)
     return d
 
 
@@ -377,6 +404,8 @@ if __name__ == '__main__':
     player_group = pygame.sprite.Group()
     bomb_group = pygame.sprite.Group()
     barrier_group = pygame.sprite.Group()
+    tool_box_group = pygame.sprite.Group()
+    bomb_box_group = pygame.sprite.Group()
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -441,6 +470,16 @@ if __name__ == '__main__':
                     if check_step_set_hero('D'):
                         player.rect.y += step_hero
 
+                if event.key == pygame.K_d:
+                    print('нажата клавиша d')
+                    #all_sprites.remove(new_tool_box)
+                    #tool_box_group.remove(new_tool_box)
+                    print(tool_box_group)
+                    tool_box_group.empty()
+                    print(tool_box_group)
+                    # all_sprites.remove(sprite)
+                    # new_tool_box.kill
+
                 player_group.draw(screen)
                 bomb_group.draw(screen)
                 barrier_group.draw(screen)
@@ -448,8 +487,8 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
         # if start_find_path:
-        print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
-        print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
+        # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
+        # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
         if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
             path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
 
@@ -458,9 +497,10 @@ if __name__ == '__main__':
                     for i in range(max_width):
                         x_step, y_step = step
                         if x_step == i and y_step == j:
-                            Bomb(i,j)
+                            pass
+                            # Bomb(i,j)
 
-        print(path)
+        # print(path)
 
         all_sprites.draw(screen)
         all_sprites.update()
@@ -468,5 +508,7 @@ if __name__ == '__main__':
         player_group.draw(screen)
         bomb_group.draw(screen)
         barrier_group.draw(screen)
+        tool_box_group.draw(screen)
+        bomb_box_group.draw(screen)
         pygame.display.flip()
     pygame.quit()
