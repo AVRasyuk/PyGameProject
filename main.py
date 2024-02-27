@@ -56,6 +56,29 @@ def start_screen():
 
         pygame.display.flip()
         clock.tick(FPS)
+def info_line():
+
+    fon = pygame.transform.scale(load_image('info_line_fon.png'), (1200, 50))
+    screen.blit(fon, (0, 800))
+    wall = pygame.transform.scale(load_image('wall.png'), (30, 30))
+    screen.blit(wall, (50, 810))
+    font = pygame.font.Font(None, 30)
+    text_coord = 810
+    string_rendered = font.render('Стенки:', 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 100
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+    bomb = pygame.transform.scale(load_image('bomb.png'), (30, 30))
+    screen.blit(bomb, (250, 810))
+    font = pygame.font.Font(None, 30)
+    text_coord = 810
+    string_rendered = font.render('Бомбы:', 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 300
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+
 
 
 def load_level(filename):
@@ -140,8 +163,7 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
         self.image = tile_images[tile_type]
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 class Player(pygame.sprite.Sprite):
@@ -391,11 +413,12 @@ if __name__ == '__main__':
         print('Неправильное имя файла, завершаем игру...')
         terminate()
     pygame.init()
-    size = width, height = 1200, 800
+    size = width, height = 1200, 850
     screen = pygame.display.set_mode(size)
     v = 50
     fps = 20
     start_screen()
+    info_line()
     # основной персонаж
     player = None
     # группы спрайтов
@@ -409,7 +432,7 @@ if __name__ == '__main__':
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
-    size = width, height = 1200, 800
+    size = width, height = 1200, 850
     screen = pygame.display.set_mode(size)
     player, bad_robot, level_x, level_y = generate_level(load_level(file_name_level))
 
@@ -418,6 +441,7 @@ if __name__ == '__main__':
         speed = v / fps
         clock.tick(fps)
         screen.fill((0, 0, 0))
+        info_line()
         for event in pygame.event.get():
 
             if event.type == pygame.KEYDOWN:
