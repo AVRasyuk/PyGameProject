@@ -172,6 +172,7 @@ box_bomb_image = load_image('box_bomb.png')
 tool_box_image = load_image('tool_box.png')
 bomb_image = load_image('bomb.png')
 barrier_image = load_image('barrier.png')
+image_boom = load_image('boom.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -191,11 +192,17 @@ class Player(pygame.sprite.Sprite):
 
 
 class BadRobot(pygame.sprite.Sprite):
+    image_boom = load_image('boom.png')
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = bad_robot_image
+        self.add(bad_robot_group)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+    def boom(self):
+        self.image = self.image_boom
+
 
 
 class BombBox(pygame.sprite.Sprite):
@@ -218,6 +225,7 @@ class Bomb(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         # print(pos_x, pos_y)
         super().__init__(bomb_group, all_sprites)
+        self.add(bomb_group)
         self.image = bomb_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
@@ -454,6 +462,8 @@ if __name__ == '__main__':
     barrier_group = pygame.sprite.Group()
     tool_box_group = pygame.sprite.Group()
     bomb_box_group = pygame.sprite.Group()
+    bad_robot_group = pygame.sprite.Group()
+    flag_movie_bad_robot = True
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -540,7 +550,7 @@ if __name__ == '__main__':
         # if start_find_path:
         # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
         # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
-        if takt - takt_bad_robot > 20:
+        if takt - takt_bad_robot > 20 and flag_movie_bad_robot:
             if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
                 path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
 
@@ -564,13 +574,16 @@ if __name__ == '__main__':
                 x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
                 bad_robot.rect.x = x_point_bad_robot * tile_width
                 bad_robot.rect.y = y_point_bad_robot * tile_height
+                if pygame.sprite.spritecollideany(bad_robot, bomb_group):
+                    bad_robot.boom()
+                    flag_movie_bad_robot = False
+
                 if len(bad_robot_move_path) == 0:
                     pass
                     # x_point_bad_robot, y_point_bad_robot = x, y
                     # self.start_move_ball = False
             # self.ticks = 0
             takt_bad_robot = takt
-
 
         # print(path)
         info_line_update(barrier_count, bomb_count)
@@ -582,6 +595,7 @@ if __name__ == '__main__':
         barrier_group.draw(screen)
         tool_box_group.draw(screen)
         bomb_box_group.draw(screen)
+        bad_robot_group.draw(screen)
         pygame.display.flip()
         takt += 1
         if takt > 10000:
