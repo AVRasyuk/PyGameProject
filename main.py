@@ -80,7 +80,6 @@ def info_line():
     screen.blit(string_rendered, intro_rect)
 
 
-
 def info_line_update(wall_count, bomb_count):
     text_coord = 805
     font = pygame.font.Font(None, 40)
@@ -96,7 +95,6 @@ def info_line_update(wall_count, bomb_count):
     intro_rect.x = 590
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
-
 
 
 def load_level(filename):
@@ -410,6 +408,7 @@ def get_path(x1, y1, x2, y2):
                     path.append(v)
     path.reverse()
     bad_robot_move_path = path[:]
+    bad_robot_move_path.pop(0)
     # print('путь выхода - ', path)
     if len(path) > 1:
         pass
@@ -461,9 +460,11 @@ if __name__ == '__main__':
     size = width, height = 1200, 850
     screen = pygame.display.set_mode(size)
     player, bad_robot, level_x, level_y = generate_level(load_level(file_name_level))
-
+    takt = 1
+    takt_bad_robot = 0
     running = True
     while running:
+
         speed = v / fps
         clock.tick(fps)
         screen.fill((0, 0, 0))
@@ -539,16 +540,37 @@ if __name__ == '__main__':
         # if start_find_path:
         # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
         # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
-        if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
-            path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
+        if takt - takt_bad_robot > 20:
+            if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
+                path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
 
-            for step in path[1:]:
-                for j in range(max_height):
-                    for i in range(max_width):
-                        x_step, y_step = step
-                        if x_step == i and y_step == j:
-                            pass
-                            # Bomb(i,j)
+                # for step in path[1:]:
+                #     for j in range(max_height):
+                #         for i in range(max_width):
+                #             x_step, y_step = step
+                #             if x_step == i and y_step == j:
+                #                 pass
+                #                 # Bomb(i,j)
+
+            if len(bad_robot_move_path) > 0:
+                # print(bad_robot_move_path)
+                x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
+                bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 6
+                digit_map[y_step_bad_robot][x_step_bad_robot] = 6
+                # print('bad robot coord: ', x_point_bad_robot, y_point_bad_robot)
+                # print(bad_robot_map)
+                bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 0
+                digit_map[y_point_bad_robot][x_point_bad_robot] = 0
+                x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
+                bad_robot.rect.x = x_point_bad_robot * tile_width
+                bad_robot.rect.y = y_point_bad_robot * tile_height
+                if len(bad_robot_move_path) == 0:
+                    pass
+                    # x_point_bad_robot, y_point_bad_robot = x, y
+                    # self.start_move_ball = False
+            # self.ticks = 0
+            takt_bad_robot = takt
+
 
         # print(path)
         info_line_update(barrier_count, bomb_count)
@@ -561,4 +583,8 @@ if __name__ == '__main__':
         tool_box_group.draw(screen)
         bomb_box_group.draw(screen)
         pygame.display.flip()
+        takt += 1
+        if takt > 10000:
+            takt = 0
+
     pygame.quit()
