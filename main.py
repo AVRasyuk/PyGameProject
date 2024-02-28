@@ -193,6 +193,7 @@ class Player(pygame.sprite.Sprite):
 
 class BadRobot(pygame.sprite.Sprite):
     image_boom = load_image('boom.png')
+
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = bad_robot_image
@@ -202,7 +203,6 @@ class BadRobot(pygame.sprite.Sprite):
 
     def boom(self):
         self.image = self.image_boom
-
 
 
 class BombBox(pygame.sprite.Sprite):
