@@ -231,11 +231,18 @@ class Bomb(pygame.sprite.Sprite):
 
 
 class Barrier(pygame.sprite.Sprite):
+    barrier_boom_image = load_image('boom.png')
     def __init__(self, pos_x, pos_y):
         print(pos_x, pos_y)
         super().__init__(barrier_group, all_sprites)
         self.image = barrier_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+    def delite_barrier(self):
+        # if self.rect.x == x_step_bad_robot * tile_width and self.rect.y == y_step_bad_robot * tile_height:
+        self.image = self.barrier_boom_image
+
+
 
 
 # def check_step(direction):
@@ -315,7 +322,7 @@ def check_step_set_hero(direction, install='еmpty'):
                 if barrier_count > 0:
                     digit_map[y_point_hero][x_point_hero] = 3
                     barrier_count -= 1
-                    bad_robot_map[y_point_hero][x_point_hero] = 3
+                    bad_robot_map[y_point_hero][x_point_hero] = 1
                     Barrier(x_point_hero, y_point_hero)
                 else:
                     digit_map[y_point_hero][x_point_hero] = 0
@@ -551,6 +558,7 @@ if __name__ == '__main__':
         # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
         # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
         if takt - takt_bad_robot > 20 and flag_movie_bad_robot:
+            # bad_robot_move_path = []
             if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
                 path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
 
@@ -563,26 +571,42 @@ if __name__ == '__main__':
                 #                 # Bomb(i,j)
 
             if len(bad_robot_move_path) > 0:
-                # print(bad_robot_move_path)
-                x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
-                bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 6
-                digit_map[y_step_bad_robot][x_step_bad_robot] = 6
-                # print('bad robot coord: ', x_point_bad_robot, y_point_bad_robot)
-                # print(bad_robot_map)
-                bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 0
-                digit_map[y_point_bad_robot][x_point_bad_robot] = 0
-                x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
-                bad_robot.rect.x = x_point_bad_robot * tile_width
-                bad_robot.rect.y = y_point_bad_robot * tile_height
-                if pygame.sprite.spritecollideany(bad_robot, bomb_group):
-                    bad_robot.boom()
-                    flag_movie_bad_robot = False
+                x_step_bad_robot, y_step_bad_robot = bad_robot_move_path[0]
+                if bad_robot_map[y_step_bad_robot][x_step_bad_robot] == 0:
+                    bad_robot_stop_takt = 0
+                    x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
+                    bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 6
+                    digit_map[y_step_bad_robot][x_step_bad_robot] = 6
+                    # print('bad robot coord: ', x_point_bad_robot, y_point_bad_robot)
+                    # print(bad_robot_map)
+                    bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 0
+                    digit_map[y_point_bad_robot][x_point_bad_robot] = 0
+                    x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
+                    bad_robot.rect.x = x_point_bad_robot * tile_width
+                    bad_robot.rect.y = y_point_bad_robot * tile_height
+                    if pygame.sprite.spritecollideany(bad_robot, bomb_group):
+                        bad_robot.boom()
+                        flag_movie_bad_robot = False
 
-                if len(bad_robot_move_path) == 0:
-                    pass
-                    # x_point_bad_robot, y_point_bad_robot = x, y
-                    # self.start_move_ball = False
-            # self.ticks = 0
+                    if len(bad_robot_move_path) == 0:
+                        print('Bad Robot STOP нет пути!!!!!')
+
+                        # x_point_bad_robot, y_point_bad_robot = x, y
+                        # self.start_move_ball = False
+                # self.ticks = 0
+                else:
+                    print('GAME STOP нет пути!!!!!')
+                    bad_robot_stop_takt += 1
+                    print(bad_robot_stop_takt)
+                    if bad_robot_stop_takt > 5:
+                        x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
+                        bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 0
+                        digit_map[y_step_bad_robot][x_step_bad_robot] = 0
+                        bad_robot_stop_takt = 0
+                        # barrier_group.delite_barrier()
+                        all_sprites.draw(screen)
+                        print( all_sprites)
+
             takt_bad_robot = takt
 
         # print(path)
