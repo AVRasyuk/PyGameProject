@@ -173,12 +173,13 @@ tool_box_image = load_image('tool_box.png')
 bomb_image = load_image('bomb.png')
 barrier_image = load_image('barrier.png')
 image_boom = load_image('boom.png')
-broken_barrier_image1 = load_image('broken_barrier1.png')
-broken_barrier_image2 = load_image('broken_barrier2.png')
-broken_barrier_image3 = load_image('broken_barrier3.png')
-broken_barrier_image4 = load_image('broken_barrier4.png')
-broken_barrier_image5 = load_image('broken_barrier5.png')
-broken_barrier_image6 = load_image('broken_barrier6.png')
+broken_barrier_sheet = load_image('broken_barrier_sheet.png')
+# broken_barrier_image1 = load_image('broken_barrier1.png')
+# broken_barrier_image2 = load_image('broken_barrier2.png')
+# broken_barrier_image3 = load_image('broken_barrier3.png')
+# broken_barrier_image4 = load_image('broken_barrier4.png')
+# broken_barrier_image5 = load_image('broken_barrier5.png')
+# broken_barrier_image6 = load_image('broken_barrier6.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -250,34 +251,59 @@ class Barrier(pygame.sprite.Sprite):
         self.image = self.barrier_boom_image
 
 
+# class BrokenBarrier(pygame.sprite.Sprite):
+#     broken_barrier_image1 = load_image('broken_barrier1.png')
+#     broken_barrier_image2 = load_image('broken_barrier2.png')
+#     broken_barrier_image3 = load_image('broken_barrier3.png')
+#     broken_barrier_image4 = load_image('broken_barrier4.png')
+#     broken_barrier_image5 = load_image('broken_barrier5.png')
+#     broken_barrier_image6 = load_image('broken_barrier6.png')
+#
+#     def __init__(self, pos_x, pos_y):
+#         print(pos_x, pos_y)
+#         super().__init__(barrier_group, all_sprites)
+#         self.image = broken_barrier_image1
+#         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
+#
+#     def change_barrier(self, step):
+#         match step:
+#             case 1:
+#                 self.image = broken_barrier_image1
+#             case 2:
+#                 self.image = broken_barrier_image2
+#             case 3:
+#                 self.image = broken_barrier_image3
+#             case 4:
+#                 self.image = broken_barrier_image4
+#             case 5:
+#                 self.image = broken_barrier_image5
+#             case 6:
+#                 self.image = broken_barrier_image6
+
 class BrokenBarrier(pygame.sprite.Sprite):
-    broken_barrier_image1 = load_image('broken_barrier1.png')
-    broken_barrier_image2 = load_image('broken_barrier2.png')
-    broken_barrier_image3 = load_image('broken_barrier3.png')
-    broken_barrier_image4 = load_image('broken_barrier4.png')
-    broken_barrier_image5 = load_image('broken_barrier5.png')
-    broken_barrier_image6 = load_image('broken_barrier6.png')
+    broken_barrier_sheet = load_image('broken_barrier_sheet.png')
 
     def __init__(self, pos_x, pos_y):
-        print(pos_x, pos_y)
         super().__init__(barrier_group, all_sprites)
-        self.image = broken_barrier_image1
+        self.frames = []
+        self.cut_sheet(broken_barrier_sheet, 3, 2)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
-    def change_barrier(self, step):
-        match step:
-            case 1:
-                self.image = broken_barrier_image1
-            case 2:
-                self.image = broken_barrier_image2
-            case 3:
-                self.image = broken_barrier_image3
-            case 4:
-                self.image = broken_barrier_image4
-            case 5:
-                self.image = broken_barrier_image5
-            case 6:
-                self.image = broken_barrier_image6
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+    def update_broken_barrier(self, takt):
+        print('update_broken_barrier', takt)
+        self.cur_frame = takt
+        print(self.cur_frame)
+        self.image = self.frames[self.cur_frame]
 
 
 # def check_step(direction):
@@ -624,22 +650,21 @@ if __name__ == '__main__':
                         flag_movie_bad_robot = False
 
                     if len(bad_robot_move_path) == 0:
-                        print('Bad Robot STOP нет пути!!!!!')
+                        print('GAME OVER!')
 
                         # x_point_bad_robot, y_point_bad_robot = x, y
                         # self.start_move_ball = False
                 # self.ticks = 0
                 else:
-                    print('GAME STOP нет пути!!!!!')
+                    print('Bad Robot STOP - ', bad_robot_stop_takt)
                     if bad_robot_stop_takt == 0:
                         broken_barrier = BrokenBarrier(x_step_bad_robot, y_step_bad_robot)
-                        bad_robot_stop_takt = 1
+                        bad_robot_stop_takt += 1
                     else:
-                        broken_barrier.change_barrier(bad_robot_stop_takt)
-                    bad_robot_stop_takt += 1
-
-                    print(bad_robot_stop_takt)
-                    if bad_robot_stop_takt > 7:
+                        bad_robot_stop_takt += 1
+                        if bad_robot_stop_takt < 6:
+                            broken_barrier.update_broken_barrier(bad_robot_stop_takt)
+                    if bad_robot_stop_takt > 5:
                         x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
                         x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
                         bad_robot.rect.x = x_point_bad_robot * tile_width
@@ -650,10 +675,7 @@ if __name__ == '__main__':
                         bad_robot_group.draw(screen)
                         # barrier_group.delite_barrier()
                         all_sprites.draw(screen)
-                        print(all_sprites)
-
             takt_bad_robot = takt
-
         # print(path)
         info_line_update(barrier_count, bomb_count)
         all_sprites.draw(screen)
