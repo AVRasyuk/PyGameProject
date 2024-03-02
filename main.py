@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import random
 
 
 def load_image(name, colorkey=None):
@@ -306,6 +307,34 @@ class BrokenBarrier(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
+class Particle(pygame.sprite.Sprite):
+    # сгенерируем частицы разного размера
+    fire = [load_image("boom.png")]
+    for scale in (2, 3, 5):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(particle_group, all_sprites)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.rect_boom = self.rect.x - 50, self.rect.y - 50, 100, 100
+
+    def update(self):
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(self.rect_boom):
+            self.kill()
+
+
+def create_particles(position):
+    particle_count = 150
+    numbers = range(-10, 10)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
+
 # def check_step(direction):
 #     print('вызов check_step')
 #     if direction == 'L':
@@ -515,6 +544,7 @@ if __name__ == '__main__':
         terminate()
     pygame.init()
     size = width, height = 1200, 850
+    screen_rect = (0, 0, width, height)
     screen = pygame.display.set_mode(size)
     v = 50
     fps = 20
@@ -531,6 +561,7 @@ if __name__ == '__main__':
     tool_box_group = pygame.sprite.Group()
     bomb_box_group = pygame.sprite.Group()
     bad_robot_group = pygame.sprite.Group()
+    particle_group = pygame.sprite.Group()
     flag_movie_bad_robot = True
 
     clock = pygame.time.Clock()
@@ -647,6 +678,8 @@ if __name__ == '__main__':
                     bad_robot.rect.y = y_point_bad_robot * tile_height
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
+                        position_boom = bad_robot.rect.x, bad_robot.rect.y
+                        create_particles(position_boom)
                         flag_movie_bad_robot = False
 
                     if len(bad_robot_move_path) == 0:
@@ -687,6 +720,7 @@ if __name__ == '__main__':
         tool_box_group.draw(screen)
         bomb_box_group.draw(screen)
         bad_robot_group.draw(screen)
+        particle_group.draw(screen)
         pygame.display.flip()
         takt += 1
         if takt > 10000:
