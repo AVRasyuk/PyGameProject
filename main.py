@@ -175,6 +175,7 @@ bomb_image = load_image('bomb.png')
 barrier_image = load_image('barrier.png')
 image_boom = load_image('boom.png')
 broken_barrier_sheet = load_image('broken_barrier_sheet.png')
+bad_robot_sheet = load_image('bad_robot_sheet.png')
 # broken_barrier_image1 = load_image('broken_barrier1.png')
 # broken_barrier_image2 = load_image('broken_barrier2.png')
 # broken_barrier_image3 = load_image('broken_barrier3.png')
@@ -199,18 +200,48 @@ class Player(pygame.sprite.Sprite):
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
+# class BadRobot(pygame.sprite.Sprite):
+#     image_boom = load_image('boom.png')
+#
+#     def __init__(self, pos_x, pos_y):
+#         super().__init__(bad_robot_group, all_sprites)
+#         self.image = bad_robot_image
+#         self.add(bad_robot_group)
+#         self.rect = self.image.get_rect().move(
+#             tile_width * pos_x + 0, tile_height * pos_y + 0)
+#
+#     def boom(self):
+#         self.image = self.image_boom
+
+
 class BadRobot(pygame.sprite.Sprite):
+    bad_robot_sheet = load_image('bad_robot.png')
     image_boom = load_image('boom.png')
 
     def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = bad_robot_image
-        self.add(bad_robot_group)
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 0, tile_height * pos_y + 0)
+        super().__init__(bad_robot_group, all_sprites)
+        self.frames = []
+        self.cut_sheet(bad_robot_sheet, 3, 2)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
     def boom(self):
-        self.image = self.image_boom
+        self.image = image_boom
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+    def update_broken_barrier(self, takt):
+        print('update_broken_barrier', takt)
+        self.cur_frame = takt
+        print(self.cur_frame)
+        self.image = self.frames[self.cur_frame]
 
 
 class BombBox(pygame.sprite.Sprite):
@@ -693,10 +724,12 @@ if __name__ == '__main__':
                     if bad_robot_stop_takt == 0:
                         broken_barrier = BrokenBarrier(x_step_bad_robot, y_step_bad_robot)
                         bad_robot_stop_takt += 1
+                        bad_robot.update_broken_barrier(bad_robot_stop_takt)
                     else:
                         bad_robot_stop_takt += 1
                         if bad_robot_stop_takt < 6:
                             broken_barrier.update_broken_barrier(bad_robot_stop_takt)
+                            bad_robot.update_broken_barrier(bad_robot_stop_takt)
                     if bad_robot_stop_takt > 5:
                         x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
                         x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
@@ -705,6 +738,7 @@ if __name__ == '__main__':
                         bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 0
                         digit_map[y_step_bad_robot][x_step_bad_robot] = 0
                         bad_robot_stop_takt = 0
+                        bad_robot.update_broken_barrier(bad_robot_stop_takt)
                         bad_robot_group.draw(screen)
                         # barrier_group.delite_barrier()
                         all_sprites.draw(screen)
