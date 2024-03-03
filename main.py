@@ -67,6 +67,12 @@ def start_screen():
         clock.tick(FPS)
 
 
+def start_new_level(number_level):
+    list_file_name_level = ['map1.txt', 'map2.txt', 'map3.txt', 'map4.txt', 'map5.txt']
+    file_name_level = list_file_name_level[number_level - 1]
+    return file_name_level
+
+
 def info_line():
     fon = pygame.transform.scale(load_image('info_line_fon.png'), (1200, 50))
     screen.blit(fon, (0, 800))
@@ -226,7 +232,6 @@ class BadRobot(pygame.sprite.Sprite):
         pygame.mixer.init()
         pygame.mixer.music.load(sound_exploded)
         pygame.mixer.music.play()
-
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -506,15 +511,15 @@ board = [[]]
 clock = pygame.time.Clock()
 
 if __name__ == '__main__':
-    # global file_name_level
-    print('Введите имя файла уровня map1.txt, map2.txt, map3.txt:')
-    file_name_level = input()
-    if (file_name_level == 'map1.txt' or file_name_level == 'map2.txt'
-            or file_name_level == 'map3.txt'):
-        print('Начинаем игру!')
-    else:
-        print('Неправильное имя файла, завершаем игру...')
-        terminate()
+    # # global file_name_level
+    # print('Введите имя файла уровня map1.txt, map2.txt, map3.txt:')
+    # file_name_level = input()
+    # if (file_name_level == 'map1.txt' or file_name_level == 'map2.txt'
+    #         or file_name_level == 'map3.txt'):
+    #     print('Начинаем игру!')
+    # else:
+    #     print('Неправильное имя файла, завершаем игру...')
+    #     terminate()
     pygame.init()
     size = width, height = 1200, 850
     screen_rect = (0, 0, width, height)
@@ -537,14 +542,17 @@ if __name__ == '__main__':
     detonation_group = pygame.sprite.Group()
     flag_movie_bad_robot = True
     flag_exploded_bad_robot = False
+    number_level = 1
+    falg_end_level = False
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
     size = width, height = 1200, 850
     screen = pygame.display.set_mode(size)
-    player, bad_robot, level_x, level_y = generate_level(load_level(file_name_level))
+    player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
     takt = 1
     takt_bad_robot = 0
+    takt_end_level = 0
     running = True
     while running:
 
@@ -653,9 +661,13 @@ if __name__ == '__main__':
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
                         flag_exploded_bad_robot = True
+                        flag_movie_bad_robot = False
                         position_boom = bad_robot.rect.x, bad_robot.rect.y
                         create_detonation(position_boom)
-                        flag_movie_bad_robot = False
+                        number_level += 1
+                        takt_end_level = takt
+                        # flag_movie_bad_robot = True
+                        falg_end_level = True
 
                     if len(bad_robot_move_path) == 0:
                         print('GAME OVER!')
@@ -687,6 +699,41 @@ if __name__ == '__main__':
                         # barrier_group.delite_barrier()
                         all_sprites.draw(screen)
             takt_bad_robot = takt
+
+        if takt - takt_end_level > 70 and falg_end_level:
+            pygame.init()
+            size = width, height = 1200, 850
+            screen_rect = (0, 0, width, height)
+            screen = pygame.display.set_mode(size)
+            v = 50
+            fps = 20
+            info_line()
+            x_point_hero = 0
+            y_point_hero = 0
+            x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
+            bomb_count, barrier_count = 0, 0
+            bad_robot_move_path = []
+            bad_robot_map, digit_map = [[]], [[]]
+            board = [[]]
+            # основной персонаж
+            all_sprites.empty()
+            tiles_group.empty()
+            player_group.empty()
+            bomb_group.empty()
+            barrier_group.empty()
+            tool_box_group.empty()
+            bomb_box_group.empty()
+            bad_robot_group.empty()
+            detonation_group.empty()
+            bomb_count, barrier_count = 0, 0
+            player = None
+            screen = pygame.display.set_mode(size)
+            player, bad_robot, level_x, level_y = generate_level(
+                load_level(start_new_level(number_level)))
+
+            flag_movie_bad_robot = True
+            falg_end_level = False
+
         # print(path)
         info_line_update(barrier_count, bomb_count)
         all_sprites.draw(screen)
