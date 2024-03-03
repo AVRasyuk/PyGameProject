@@ -27,6 +27,12 @@ def terminate():
 
 
 def start_screen():
+    sound_intro = 'data\sound_intro.mp3'
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(sound_intro)
+    pygame.mixer.music.play()
+
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
     intro_text = ["Программа 'Перемещение героя'",
                   "Управление героем: клавиши:",
@@ -50,9 +56,11 @@ def start_screen():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.music.stop()
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.music.stop()
                 return  # начинаем игру
 
         pygame.display.flip()
@@ -99,6 +107,11 @@ def info_line_update(wall_count, bomb_count):
 
 
 def load_level(filename):
+    sound_level1 = 'data\sound_level1.mp3'
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(sound_level1)
+    pygame.mixer.music.play()
     global max_width, max_height
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -176,12 +189,6 @@ barrier_image = load_image('barrier.png')
 image_boom = load_image('boom.png')
 broken_barrier_sheet = load_image('broken_barrier_sheet.png')
 bad_robot_sheet = load_image('bad_robot_sheet.png')
-# broken_barrier_image1 = load_image('broken_barrier1.png')
-# broken_barrier_image2 = load_image('broken_barrier2.png')
-# broken_barrier_image3 = load_image('broken_barrier3.png')
-# broken_barrier_image4 = load_image('broken_barrier4.png')
-# broken_barrier_image5 = load_image('broken_barrier5.png')
-# broken_barrier_image6 = load_image('broken_barrier6.png')
 tile_width = tile_height = step_hero = 50
 
 
@@ -200,20 +207,6 @@ class Player(pygame.sprite.Sprite):
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
 
-# class BadRobot(pygame.sprite.Sprite):
-#     image_boom = load_image('boom.png')
-#
-#     def __init__(self, pos_x, pos_y):
-#         super().__init__(bad_robot_group, all_sprites)
-#         self.image = bad_robot_image
-#         self.add(bad_robot_group)
-#         self.rect = self.image.get_rect().move(
-#             tile_width * pos_x + 0, tile_height * pos_y + 0)
-#
-#     def boom(self):
-#         self.image = self.image_boom
-
-
 class BadRobot(pygame.sprite.Sprite):
     bad_robot_sheet = load_image('bad_robot.png')
     image_boom = load_image('boom.png')
@@ -228,6 +221,12 @@ class BadRobot(pygame.sprite.Sprite):
 
     def boom(self):
         self.image = image_boom
+        sound_exploded = 'data\sound_exploded.mp3'
+        pygame.init()
+        pygame.mixer.init()
+        pygame.mixer.music.load(sound_exploded)
+        pygame.mixer.music.play()
+
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -283,35 +282,6 @@ class Barrier(pygame.sprite.Sprite):
         self.image = self.barrier_boom_image
 
 
-# class BrokenBarrier(pygame.sprite.Sprite):
-#     broken_barrier_image1 = load_image('broken_barrier1.png')
-#     broken_barrier_image2 = load_image('broken_barrier2.png')
-#     broken_barrier_image3 = load_image('broken_barrier3.png')
-#     broken_barrier_image4 = load_image('broken_barrier4.png')
-#     broken_barrier_image5 = load_image('broken_barrier5.png')
-#     broken_barrier_image6 = load_image('broken_barrier6.png')
-#
-#     def __init__(self, pos_x, pos_y):
-#         print(pos_x, pos_y)
-#         super().__init__(barrier_group, all_sprites)
-#         self.image = broken_barrier_image1
-#         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
-#
-#     def change_barrier(self, step):
-#         match step:
-#             case 1:
-#                 self.image = broken_barrier_image1
-#             case 2:
-#                 self.image = broken_barrier_image2
-#             case 3:
-#                 self.image = broken_barrier_image3
-#             case 4:
-#                 self.image = broken_barrier_image4
-#             case 5:
-#                 self.image = broken_barrier_image5
-#             case 6:
-#                 self.image = broken_barrier_image6
-
 class BrokenBarrier(pygame.sprite.Sprite):
     broken_barrier_sheet = load_image('broken_barrier_sheet.png')
 
@@ -338,14 +308,13 @@ class BrokenBarrier(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
-class Particle(pygame.sprite.Sprite):
-    # сгенерируем частицы разного размера
+class Detonation(pygame.sprite.Sprite):
     fire = [load_image("boom.png")]
     for scale in (2, 3, 5):
         fire.append(pygame.transform.scale(fire[0], (scale, scale)))
 
     def __init__(self, pos, dx, dy):
-        super().__init__(particle_group, all_sprites)
+        super().__init__(detonation_group, all_sprites)
         self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
         self.velocity = [dx, dy]
@@ -359,38 +328,11 @@ class Particle(pygame.sprite.Sprite):
             self.kill()
 
 
-def create_particles(position):
-    particle_count = 150
+def create_detonation(position):
+    detonation_count = 150
     numbers = range(-10, 10)
-    for _ in range(particle_count):
-        Particle(position, random.choice(numbers), random.choice(numbers))
-
-
-# def check_step(direction):
-#     print('вызов check_step')
-#     if direction == 'L':
-#         delta_x, delta_y = -1, 0
-#     elif direction == 'R':
-#         delta_x, delta_y = 1, 0
-#     elif direction == 'U':
-#         delta_x, delta_y = 0, -1
-#     elif direction == 'D':
-#         delta_x, delta_y = 0, 1
-#
-#     global x_point_hero, y_point_hero, digit_map
-#     print('шаг стрелкой', x_point_hero, y_point_hero)
-#     # print(digit_map)
-#     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
-#         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] != 0:
-#             return False
-#         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 0:
-#             digit_map[y_point_hero][x_point_hero] = 0
-#             print('до шага', x_point_hero, y_point_hero)
-#             x_point_hero += delta_x
-#             y_point_hero += delta_y
-#             print('после шага', x_point_hero, y_point_hero)
-#             digit_map[y_point_hero][x_point_hero] = 5
-#             return True
+    for _ in range(detonation_count):
+        Detonation(position, random.choice(numbers), random.choice(numbers))
 
 
 def check_step_set_hero(direction, install='еmpty'):
@@ -592,8 +534,9 @@ if __name__ == '__main__':
     tool_box_group = pygame.sprite.Group()
     bomb_box_group = pygame.sprite.Group()
     bad_robot_group = pygame.sprite.Group()
-    particle_group = pygame.sprite.Group()
+    detonation_group = pygame.sprite.Group()
     flag_movie_bad_robot = True
+    flag_exploded_bad_robot = False
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -709,8 +652,9 @@ if __name__ == '__main__':
                     bad_robot.rect.y = y_point_bad_robot * tile_height
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
+                        flag_exploded_bad_robot = True
                         position_boom = bad_robot.rect.x, bad_robot.rect.y
-                        create_particles(position_boom)
+                        create_detonation(position_boom)
                         flag_movie_bad_robot = False
 
                     if len(bad_robot_move_path) == 0:
@@ -754,7 +698,7 @@ if __name__ == '__main__':
         tool_box_group.draw(screen)
         bomb_box_group.draw(screen)
         bad_robot_group.draw(screen)
-        particle_group.draw(screen)
+        detonation_group.draw(screen)
         pygame.display.flip()
         takt += 1
         if takt > 10000:

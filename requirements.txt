@@ -2,3 +2,4 @@ PyQT5
 pyqt5-tools
 PyQt5-stubs
 pygame
+random
