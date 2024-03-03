@@ -67,6 +67,31 @@ def start_screen():
         clock.tick(FPS)
 
 
+def reset_level():
+    global x_point_hero, y_point_hero, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, \
+        max_width, max_height, bomb_count, barrier_count, bad_robot_move_path, bad_robot_map, digit_map
+    x_point_hero = 0
+    y_point_hero = 0
+    x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
+    bomb_count, barrier_count = 0, 0
+    bad_robot_move_path = []
+    bad_robot_map, digit_map = [[]], [[]]
+    all_sprites.empty()
+    tiles_group.empty()
+    player_group.empty()
+    bomb_group.empty()
+    barrier_group.empty()
+    tool_box_group.empty()
+    bomb_box_group.empty()
+    bad_robot_group.empty()
+    detonation_group.empty()
+
+
+def game_over():
+    reset_level()
+    start_screen()
+
+
 def start_new_level(number_level):
     list_file_name_level = ['map1.txt', 'map2.txt', 'map3.txt', 'map4.txt', 'map5.txt']
     file_name_level = list_file_name_level[number_level - 1]
@@ -94,10 +119,17 @@ def info_line():
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
+    string_rendered = font.render('Уровень:', 1, pygame.Color('blue'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 700
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
 
-def info_line_update(wall_count, bomb_count):
+
+def info_line_update(wall_count, bomb_count, number_level):
     text_coord = 805
     font = pygame.font.Font(None, 40)
+
     text_bomb_count = str(bomb_count)
     string_rendered = font.render(text_bomb_count, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
@@ -108,6 +140,12 @@ def info_line_update(wall_count, bomb_count):
     string_rendered = font.render(text_wall_count, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 590
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+    text_number_level = str(number_level)
+    string_rendered = font.render(text_number_level, 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 800
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
@@ -186,6 +224,7 @@ tile_images = {
     'tool_box': load_image('tool_box.png'),
     # 'bomb_image': load_image('bomb.png'),
 }
+computer_image = load_image('comp.png')
 player_image = load_image('hero.png')
 bad_robot_image = load_image('bad_robot.png')
 box_bomb_image = load_image('box_bomb.png')
@@ -252,6 +291,14 @@ class BombBox(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(bomb_box_group, all_sprites)
         self.image = box_bomb_image
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 0, tile_height * pos_y + 0)
+
+
+class Computer(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(computer_group, all_sprites)
+        self.image = computer_image
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 0, tile_height * pos_y + 0)
 
@@ -421,6 +468,7 @@ def generate_level(level):
                 new_player = Player(x, y)
             elif level[y][x] == 'C':
                 Tile('comp', x, y)
+                computer = Computer(x, y)
             elif level[y][x] == 'B':
                 Tile('empty', x, y)
                 # new_box_bmb =
@@ -507,7 +555,6 @@ x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max
 bomb_count, barrier_count = 0, 0
 bad_robot_move_path = []
 bad_robot_map, digit_map = [[]], [[]]
-board = [[]]
 clock = pygame.time.Clock()
 
 if __name__ == '__main__':
@@ -540,6 +587,7 @@ if __name__ == '__main__':
     bomb_box_group = pygame.sprite.Group()
     bad_robot_group = pygame.sprite.Group()
     detonation_group = pygame.sprite.Group()
+    computer_group = pygame.sprite.Group()
     flag_movie_bad_robot = True
     flag_exploded_bad_robot = False
     number_level = 1
@@ -658,13 +706,23 @@ if __name__ == '__main__':
                     x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
                     bad_robot.rect.x = x_point_bad_robot * tile_width
                     bad_robot.rect.y = y_point_bad_robot * tile_height
+
+                    if pygame.sprite.spritecollideany(bad_robot, player_group) or pygame.sprite.spritecollideany(
+                            bad_robot, computer_group):
+                        # GAME OVER
+                        game_over()
+                        number_level = 1
+                        player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
+                        flag_movie_bad_robot = True
+                        falg_end_level = False
+
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
                         flag_exploded_bad_robot = True
                         flag_movie_bad_robot = False
                         position_boom = bad_robot.rect.x, bad_robot.rect.y
                         create_detonation(position_boom)
-                        number_level += 1
+                        # number_level += 1
                         takt_end_level = takt
                         # flag_movie_bad_robot = True
                         falg_end_level = True
@@ -687,12 +745,16 @@ if __name__ == '__main__':
                             broken_barrier.update_broken_barrier(bad_robot_stop_takt)
                             bad_robot.update_broken_barrier(bad_robot_stop_takt)
                     if bad_robot_stop_takt > 5:
+                        bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 0
+                        digit_map[y_point_bad_robot][x_point_bad_robot] = 0
                         x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
+                        bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 0
+                        digit_map[y_step_bad_robot][x_step_bad_robot] = 0
                         x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
                         bad_robot.rect.x = x_point_bad_robot * tile_width
                         bad_robot.rect.y = y_point_bad_robot * tile_height
-                        bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 0
-                        digit_map[y_step_bad_robot][x_step_bad_robot] = 0
+                        bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 6
+                        digit_map[y_point_bad_robot][x_point_bad_robot] = 6
                         bad_robot_stop_takt = 0
                         bad_robot.update_broken_barrier(bad_robot_stop_takt)
                         bad_robot_group.draw(screen)
@@ -708,40 +770,23 @@ if __name__ == '__main__':
             v = 50
             fps = 20
             info_line()
-            x_point_hero = 0
-            y_point_hero = 0
-            x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
-            bomb_count, barrier_count = 0, 0
-            bad_robot_move_path = []
-            bad_robot_map, digit_map = [[]], [[]]
-            board = [[]]
-            # основной персонаж
-            all_sprites.empty()
-            tiles_group.empty()
-            player_group.empty()
-            bomb_group.empty()
-            barrier_group.empty()
-            tool_box_group.empty()
-            bomb_box_group.empty()
-            bad_robot_group.empty()
-            detonation_group.empty()
-            bomb_count, barrier_count = 0, 0
+            reset_level()
             player = None
             screen = pygame.display.set_mode(size)
+            number_level += 1
             player, bad_robot, level_x, level_y = generate_level(
                 load_level(start_new_level(number_level)))
-
             flag_movie_bad_robot = True
             falg_end_level = False
 
         # print(path)
-        info_line_update(barrier_count, bomb_count)
+        info_line_update(barrier_count, bomb_count, number_level)
         all_sprites.draw(screen)
         all_sprites.update()
         tiles_group.draw(screen)
-        player_group.draw(screen)
         bomb_group.draw(screen)
         barrier_group.draw(screen)
+        player_group.draw(screen)
         tool_box_group.draw(screen)
         bomb_box_group.draw(screen)
         bad_robot_group.draw(screen)
