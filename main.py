@@ -85,11 +85,24 @@ def reset_level():
     bomb_box_group.empty()
     bad_robot_group.empty()
     detonation_group.empty()
+    game_over_group.empty()
 
 
 def game_over():
+    # while True:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             pygame.mixer.music.stop()
+    #             terminate()
+    #         elif event.type == pygame.KEYDOWN or \
+    #                 event.type == pygame.MOUSEBUTTONDOWN:
+    #             pygame.mixer.music.stop()
+    #             return  # начинаем игру
+
+
     reset_level()
     start_screen()
+
 
 
 def start_new_level(number_level):
@@ -588,10 +601,12 @@ if __name__ == '__main__':
     bad_robot_group = pygame.sprite.Group()
     detonation_group = pygame.sprite.Group()
     computer_group = pygame.sprite.Group()
+    game_over_group = pygame.sprite.Group()
     flag_movie_bad_robot = True
     flag_exploded_bad_robot = False
     number_level = 1
     falg_end_level = False
+    flag_game_over = False
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -710,11 +725,24 @@ if __name__ == '__main__':
                     if pygame.sprite.spritecollideany(bad_robot, player_group) or pygame.sprite.spritecollideany(
                             bad_robot, computer_group):
                         # GAME OVER
-                        game_over()
-                        number_level = 1
-                        player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
-                        flag_movie_bad_robot = True
+                        sprite_game_over = pygame.sprite.Sprite()
+                        # определим его вид
+                        sprite_game_over.image = load_image("game_over.png")
+                        # и размеры
+                        sprite_game_over.rect = sprite_game_over.image.get_rect()
+                        sprite_game_over.rect.x = 50
+                        sprite_game_over.rect.y = 300
+                        # добавим спрайт в группу
+                        game_over_group.add(sprite_game_over)
+                        sound_game_over = 'data\game_over.mp3'
+                        pygame.init()
+                        pygame.mixer.init()
+                        pygame.mixer.music.load(sound_game_over)
+                        pygame.mixer.music.play()
+                        flag_movie_bad_robot = False
                         falg_end_level = False
+                        flag_game_over = True
+                        takt_end_level = takt
 
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
@@ -779,6 +807,14 @@ if __name__ == '__main__':
             flag_movie_bad_robot = True
             falg_end_level = False
 
+        if takt - takt_end_level > 70 and flag_game_over:
+            game_over()
+            number_level = 1
+            player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
+            flag_game_over = False
+            flag_movie_bad_robot = True
+
+
         # print(path)
         info_line_update(barrier_count, bomb_count, number_level)
         all_sprites.draw(screen)
@@ -791,6 +827,7 @@ if __name__ == '__main__':
         bomb_box_group.draw(screen)
         bad_robot_group.draw(screen)
         detonation_group.draw(screen)
+        game_over_group.draw(screen)
         pygame.display.flip()
         takt += 1
         if takt > 10000:
