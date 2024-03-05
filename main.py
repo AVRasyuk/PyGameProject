@@ -37,7 +37,7 @@ def start_screen():
     intro_text = ["Программа 'Перемещение героя'",
                   "Управление героем: клавиши:",
                   "Влево, Вправо, Вверх, Вниз",
-                  "для загрузки уровня нажмите Enter",
+                  "для загрузки уровня введите Имя и нажмите Enter",
                   ]
 
     fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
@@ -53,17 +53,56 @@ def start_screen():
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
+    font_player_name = pygame.font.Font(None, 50)
+
+    need_input = True
+    input_name_player = ''
+
+
+
+    font_player = pygame.font.Font(None, 50)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.mixer.music.stop()
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.mixer.music.stop()
                 return  # начинаем игру
 
+            elif event.type == pygame.KEYDOWN and need_input:
+                if event.key == pygame.K_RETURN and need_input:
+                    need_input = False
+                    input_name_player = ''
+                    return  # начинаем игру
+
+                elif event.key == pygame.K_BACKSPACE:
+                    input_name_player = input_name_player[:-1]
+
+                else:
+                    if len(input_name_player) < 15:
+                        input_name_player += event.unicode
+                        string_rendered1 = font_player_name.render(input_name_player, 1, pygame.Color('red'))
+                        intro_rect = string_rendered1.get_rect()
+                        text_coord = 500
+                        intro_rect.top = text_coord
+                        intro_rect.x = 20
+                        text_coord += intro_rect.height
+                        screen.blit(string_rendered1, intro_rect)
+
+            # elif event.type == pygame.KEYDOWN and need_input:
+            #     if event.key == pygame.K_RETURN and need_input:
+            #         need_input = False
+            #         input_name_player = ''
+            #     elif event.key == pygame.K_BACKSPACE:
+            #         pass
+            #     else:
+            #         # input_name_player += event.unicode
+            #         intro_text += event.unicode
+
         pygame.display.flip()
+
         clock.tick(FPS)
 
 
@@ -616,6 +655,7 @@ if __name__ == '__main__':
     takt = 1
     takt_bad_robot = 0
     takt_end_level = 0
+
     running = True
     while running:
 
@@ -691,6 +731,9 @@ if __name__ == '__main__':
 
             if event.type == pygame.QUIT:
                 running = False
+
+
+
         # if start_find_path:
         # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
         # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
