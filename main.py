@@ -32,37 +32,39 @@ def start_screen():
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
-
-    pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
-    intro_text = ["Программа 'Перемещение героя'",
-                  "Управление героем: клавиши:",
-                  "Влево, Вправо, Вверх, Вниз",
-                  "для загрузки уровня введите Имя и нажмите Enter",
-                  ]
-
-    fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 350
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('red'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 20
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    font_player_name = pygame.font.Font(None, 50)
-
     need_input = True
     input_name_player = ''
-
-
 
     font_player = pygame.font.Font(None, 50)
 
     while True:
+        pygame.display.set_caption('Космическая база.')
+        intro_text = ["Программа 'Перемещение героя'",
+                      "Управление героем: клавиши:",
+                      "Влево, Вправо, Вверх, Вниз",
+                      "для загрузки уровня введите Имя и нажмите Enter",
+                      ]
+        fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.Font(None, 30)
+        text_coord = 350
+        for line in intro_text:
+            string_rendered = font.render(line, 1, pygame.Color('red'))
+            intro_rect = string_rendered.get_rect()
+            text_coord += 10
+            intro_rect.top = text_coord
+            intro_rect.x = 20
+            text_coord += intro_rect.height
+            screen.blit(string_rendered, intro_rect)
+        font_player_name = pygame.font.Font(None, 70)
+        string_rendered1 = font_player_name.render(input_name_player, 1, pygame.Color('red'))
+        intro_rect = string_rendered1.get_rect()
+        text_coord = 500
+        intro_rect.top = text_coord
+        intro_rect.x = 20
+        text_coord += intro_rect.height
+        screen.blit(string_rendered1, intro_rect)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.mixer.music.stop()
@@ -79,17 +81,10 @@ def start_screen():
 
                 elif event.key == pygame.K_BACKSPACE:
                     input_name_player = input_name_player[:-1]
-
                 else:
                     if len(input_name_player) < 15:
                         input_name_player += event.unicode
-                        string_rendered1 = font_player_name.render(input_name_player, 1, pygame.Color('red'))
-                        intro_rect = string_rendered1.get_rect()
-                        text_coord = 500
-                        intro_rect.top = text_coord
-                        intro_rect.x = 20
-                        text_coord += intro_rect.height
-                        screen.blit(string_rendered1, intro_rect)
+
 
             # elif event.type == pygame.KEYDOWN and need_input:
             #     if event.key == pygame.K_RETURN and need_input:
@@ -107,8 +102,10 @@ def start_screen():
 
 
 def reset_level():
-    global x_point_hero, y_point_hero, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, \
-        max_width, max_height, bomb_count, barrier_count, bad_robot_move_path, bad_robot_map, digit_map
+    global x_point_hero, y_point_hero, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, takt, \
+        max_width, max_height, bomb_count, barrier_count, bad_robot_move_path, bad_robot_map, digit_map, \
+        flag_stop_score_time, flag_movie_bad_robot, flag_exploded_bad_robot, falg_end_level, flag_game_over, \
+        takt_bad_robot, takt_end_level
     x_point_hero = 0
     y_point_hero = 0
     x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp, max_width, max_height = 0, 0, 0, 0, 0, 0
@@ -125,6 +122,15 @@ def reset_level():
     bad_robot_group.empty()
     detonation_group.empty()
     game_over_group.empty()
+    takt = 0
+    flag_stop_score_time = True
+    flag_movie_bad_robot = True
+    flag_exploded_bad_robot = False
+    falg_end_level = False
+    flag_game_over = False
+    takt = 1
+    takt_bad_robot = 0
+    takt_end_level = 0
 
 
 def game_over():
@@ -177,6 +183,12 @@ def info_line():
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
+    string_rendered = font.render('Баллы:', 1, pygame.Color('blue'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 1000
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+
 
 def info_line_update(wall_count, bomb_count, number_level):
     text_coord = 805
@@ -198,6 +210,12 @@ def info_line_update(wall_count, bomb_count, number_level):
     string_rendered = font.render(text_number_level, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
     intro_rect.x = 800
+    intro_rect.top = text_coord + 10
+    screen.blit(string_rendered, intro_rect)
+    text_score = str(score)
+    string_rendered = font.render(text_score, 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = 1100
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
@@ -644,8 +662,10 @@ if __name__ == '__main__':
     flag_movie_bad_robot = True
     flag_exploded_bad_robot = False
     number_level = 1
+    score = 0
     falg_end_level = False
     flag_game_over = False
+    flag_stop_score_time = False
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
@@ -797,6 +817,7 @@ if __name__ == '__main__':
                         takt_end_level = takt
                         # flag_movie_bad_robot = True
                         falg_end_level = True
+                        flag_stop_score_time = True
 
                     if len(bad_robot_move_path) == 0:
                         print('GAME OVER!')
@@ -873,6 +894,8 @@ if __name__ == '__main__':
         game_over_group.draw(screen)
         pygame.display.flip()
         takt += 1
+        if not flag_stop_score_time:
+            score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
         if takt > 10000:
             takt = 0
 
