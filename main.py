@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 import random
+import csv
 
 
 def load_image(name, colorkey=None):
@@ -27,7 +28,7 @@ def terminate():
 
 
 def start_screen():
-    sound_intro = 'data\sound_intro.mp3'
+    sound_intro = 'data\start_sound.mp3'
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
@@ -69,10 +70,6 @@ def start_screen():
             if event.type == pygame.QUIT:
                 pygame.mixer.music.stop()
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.music.stop()
-                return  # начинаем игру
-
             elif event.type == pygame.KEYDOWN and need_input:
                 if event.key == pygame.K_RETURN and need_input:
                     need_input = False
@@ -85,7 +82,6 @@ def start_screen():
                     if len(input_name_player) < 15:
                         input_name_player += event.unicode
 
-
             # elif event.type == pygame.KEYDOWN and need_input:
             #     if event.key == pygame.K_RETURN and need_input:
             #         need_input = False
@@ -95,6 +91,72 @@ def start_screen():
             #     else:
             #         # input_name_player += event.unicode
             #         intro_text += event.unicode
+
+        pygame.display.flip()
+
+        clock.tick(FPS)
+
+
+def end_screen():
+    sound_intro = 'data\end_sound.mp3'
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(sound_intro)
+    pygame.mixer.music.play()
+    need_input = True
+    input_name_player = ''
+
+    font_player = pygame.font.Font(None, 50)
+
+    with open("data\score.txt", encoding='utf-8') as r_file:
+        # Создаем объект DictReader, указываем символ-разделитель ","
+        file_reader = csv.DictReader(r_file, delimiter=",")
+        # Счетчик для подсчета количества строк и вывода заголовков столбцов
+        count = 0
+        # Считывание данных из CSV файла
+        print(file_reader)
+        list_for_table = []
+        for row in file_reader:
+            if count == 0:
+                # Вывод строки, содержащей заголовки для столбцов
+                print(f'Файл содержит столбцы: {", ".join(row)}')
+            # Вывод строк
+            print(f' {row["Name"]} - {row["Score"]}')
+            list_for_table.append([row["Name"], row["Score"]])
+            print(list_for_table)
+            count += 1
+        print(f'Всего в файле {count + 1} строк.')
+        list_for_table.sort(key=lambda x: [x[1], x[0]], reverse=1)
+        print(list_for_table)
+
+    while True:
+        pygame.display.set_caption('Космическая база. Рекорды')
+        fon = pygame.transform.scale(load_image('end_fon.png'), (width, height))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.Font(None, 100)
+        text_coord = 250
+        for line in list_for_table:
+            str_text_name, str_text_score = str(line[0]), str(line[1])
+            name_string_rendered = font.render(str_text_name, 1, pygame.Color('red'))
+            intro_rect0 = name_string_rendered.get_rect()
+            score_string_rendered = font.render(str_text_score, 1, pygame.Color('red'))
+            intro_rect1 = score_string_rendered.get_rect()
+            text_coord += 10
+            intro_rect0.top = text_coord
+            intro_rect1.top = text_coord
+            intro_rect0.x = 100
+            intro_rect1.x = 600
+            text_coord += intro_rect0.height
+            screen.blit(name_string_rendered, intro_rect0)
+            screen.blit(score_string_rendered, intro_rect1)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.mixer.music.stop()
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                pygame.mixer.music.stop()
+                return  # начинаем игру
 
         pygame.display.flip()
 
@@ -144,10 +206,9 @@ def game_over():
     #             pygame.mixer.music.stop()
     #             return  # начинаем игру
 
-
     reset_level()
+    end_screen()
     start_screen()
-
 
 
 def start_new_level(number_level):
@@ -752,8 +813,6 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
 
-
-
         # if start_find_path:
         # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
         # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
@@ -877,7 +936,6 @@ if __name__ == '__main__':
             player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
             flag_game_over = False
             flag_movie_bad_robot = True
-
 
         # print(path)
         info_line_update(barrier_count, bomb_count, number_level)
