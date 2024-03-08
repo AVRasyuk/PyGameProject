@@ -51,8 +51,8 @@ def start_screen():
                       "При полном блоировании прохода к Центральному компьютеру или",
                       "перемещений Красного Робота препятствиями,",
                       "робот активирует уничтожение препятствия за 5 ходов.",
-                      " ",
-                      "для загрузки уровня введите Имя Игрока и нажмите Enter",
+                      "Счет обратно пропорционален времени на уровне. ",
+                      "Для загрузки уровня введите Имя Игрока и нажмите Enter",
                       " ",
                       ">",
                       ]
@@ -110,6 +110,7 @@ def start_screen():
 
 
 def end_screen():
+    global summ_score
     sound_intro = 'data\end_sound.mp3'
     pygame.init()
     pygame.mixer.init()
@@ -137,25 +138,13 @@ def end_screen():
         for i in range(len(list_for_table)):
             if list_for_table[i][0] == input_name_player:
                 find = 1
-                if list_for_table[i][1] < score:
-                    list_for_table[i][1] = score
+                if list_for_table[i][1] < summ_score:
+                    list_for_table[i][1] = summ_score
         if not find:
-            list_for_table.append([input_name_player, score])
-
-        # find = 0
-        # for i in range(len(list_for_table)):
-        #     if list_for_table[i][0] == input_name_player and list_for_table[i][1] < score:
-        #         del list_for_table[i]
-        #         list_for_table.append([input_name_player, score])
-        #         find = 1
-        #     elif list_for_table[i][0] == input_name_player and list_for_table[i][1] >= score:
-        #         find = 1
-        # if find == 0:
-        #     list_for_table.append([input_name_player, score])
-
+            list_for_table.append([input_name_player, summ_score])
         list_for_table.sort(key=lambda x: [x[1], x[0]], reverse=1)
         print(list_for_table)
-
+    summ_score = 0
     count = 0
     with open(score_file_name, mode="w", encoding='utf-8') as w_file:
         header_names = ["Name", "Score"]
@@ -235,6 +224,7 @@ def reset_level():
     takt = 1
     takt_bad_robot = 0
     takt_end_level = 0
+
 
 
 def game_over():
@@ -768,6 +758,7 @@ if __name__ == '__main__':
     flag_exploded_bad_robot = False
     number_level = 1
     score = 0
+    summ_score = 0
     falg_end_level = False
     flag_game_over = False
     flag_stop_score_time = False
@@ -909,8 +900,8 @@ if __name__ == '__main__':
                         falg_end_level = False
                         flag_game_over = True
                         takt_end_level = takt
-                        if number_level == 1:
-                            score = 0
+                        flag_stop_score_time = True
+                        score = 0
 
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
@@ -923,6 +914,8 @@ if __name__ == '__main__':
                         # flag_movie_bad_robot = True
                         falg_end_level = True
                         flag_stop_score_time = True
+                        summ_score += score
+
 
                     if len(bad_robot_move_path) == 0:
                         print('GAME OVER!')
@@ -975,6 +968,7 @@ if __name__ == '__main__':
                 load_level(start_new_level(number_level)))
             flag_movie_bad_robot = True
             falg_end_level = False
+            score = 0
 
         if takt - takt_end_level > 70 and flag_game_over:
             game_over()
@@ -1000,7 +994,7 @@ if __name__ == '__main__':
         takt += 1
         if not flag_stop_score_time:
             # score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
-            score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
+            score = int((500 / takt) * 10)
         if takt > 10000:
             takt = 0
 
