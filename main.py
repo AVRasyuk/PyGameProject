@@ -228,16 +228,6 @@ def reset_level():
 
 
 def game_over():
-    # while True:
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             pygame.mixer.music.stop()
-    #             terminate()
-    #         elif event.type == pygame.KEYDOWN or \
-    #                 event.type == pygame.MOUSEBUTTONDOWN:
-    #             pygame.mixer.music.stop()
-    #             return  # начинаем игру
-
     reset_level()
     end_screen()
     start_screen()
@@ -711,7 +701,27 @@ def get_path(x1, y1, x2, y2):
         # self.start_draw_path_ball = True
 
     return path[:]
+def picture_game_over_you_win(num_picture):
+    sprite_picture = pygame.sprite.Sprite()
+    if num_picture:
+        sprite_picture.image = load_image("you_win.png")
+        sound_final = 'data\game_over.mp3'
+    else:
+        sprite_picture.image = load_image("game_over.png")
+        sound_final = 'data\game_over.mp3'
 
+    # определим его вид
+    sprite_picture.image = load_image("game_over.png")
+    # и размеры
+    sprite_picture.rect = sprite_game_over.image.get_rect()
+    sprite_picture.rect.x = 50
+    sprite_picture.rect.y = 200
+    # добавим спрайт в группу
+    game_over_group.add(sprite_picture)
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(sound_final)
+    pygame.mixer.music.play()
 
 FPS = 50
 x_point_hero = 0
@@ -964,6 +974,8 @@ if __name__ == '__main__':
             player = None
             screen = pygame.display.set_mode(size)
             number_level += 1
+            if number_level == 5:
+                you_win()
             player, bad_robot, level_x, level_y = generate_level(
                 load_level(start_new_level(number_level)))
             flag_movie_bad_robot = True
