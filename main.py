@@ -706,13 +706,10 @@ def picture_game_over_you_win(num_picture):
     sprite_picture = pygame.sprite.Sprite()
     if num_picture:
         sprite_picture.image = load_image("you_win.png")
-        sound_final = 'data\game_over.mp3'
+        sound_final = 'data\you_win.mp3'
     else:
         sprite_picture.image = load_image("game_over.png")
         sound_final = 'data\game_over.mp3'
-
-    # определим его вид
-    sprite_picture.image = load_image("game_over.png")
     # и размеры
     sprite_picture.rect = sprite_picture.image.get_rect()
     sprite_picture.rect.x = 50
@@ -961,14 +958,19 @@ if __name__ == '__main__':
             reset_level()
             player = None
             screen = pygame.display.set_mode(size)
-            number_level += 1
-            if number_level == 5:
+            if number_level == 2:
                 picture_game_over_you_win(1)
-            player, bad_robot, level_x, level_y = generate_level(
-                load_level(start_new_level(number_level)))
-            flag_movie_bad_robot = True
-            falg_end_level = False
-            score = 0
+                number_level = 1
+                player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
+                flag_game_over = False
+                flag_movie_bad_robot = True
+            else:
+                number_level += 1
+                player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
+                flag_movie_bad_robot = True
+                falg_end_level = False
+                score = 0
+
 
         if takt - takt_end_level > 70 and flag_game_over:
             game_over()
