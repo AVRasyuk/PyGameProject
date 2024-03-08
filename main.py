@@ -37,30 +37,44 @@ def start_screen():
     need_input = True
     while True:
         pygame.display.set_caption('Космическая база.')
-        intro_text = ["Программа 'Перемещение героя'",
-                      "Управление героем: клавиши:",
-                      "Влево, Вправо, Вверх, Вниз",
-                      "для загрузки уровня введите Имя и нажмите Enter",
+        intro_text = ["Задача игрока управляя стрелками на клавиатуре Зеленым Роботом ",
+                      "недопусить захвата центрального компьютера Красным Роботом.",
+                      "Игрок может установить на пути Красного Робота",
+                      "Препятствие или Бомбу.",
+                      "Чтобы установить препятствие нужно найти инструментальный ящик.",
+                      "ALT+ стрелка - установить препятствие.",
+                      "Чтобы установить бомбу нужно найти сейф с бомбами.",
+                      "CTRL+ стрелка - устанавить бомбу.",
+                      " ",
+                      "Красный Робот строит маршрут к компьютеру обходя стенки и препятствия,",
+                      "но при этом не видит бомбы на поле.",
+                      "При полном блоировании прохода к Центральному компьютеру или",
+                      "перемещений Красного Робота препятствиями,",
+                      "робот активирует уничтожение препятствия за 5 ходов.",
+                      " ",
+                      "для загрузки уровня введите Имя Игрока и нажмите Enter",
+                      " ",
+                      ">",
                       ]
         fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
         screen.blit(fon, (0, 0))
 
-        font = pygame.font.Font(font_file_name, 30)
-        text_coord = 350
+        font = pygame.font.Font(None, 30)
+        text_coord = 50
         for line in intro_text:
-            string_rendered = font.render(line, 1, pygame.Color('red'))
+            string_rendered = font.render(line, 1, pygame.Color('blue'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
             intro_rect.x = 20
             text_coord += intro_rect.height
             screen.blit(string_rendered, intro_rect)
-        font_player_name = pygame.font.Font(font_file_name, 70)
+        font_player_name = pygame.font.Font(font_file_name, 40)
         string_rendered1 = font_player_name.render(input_name_player, 1, pygame.Color('red'))
         intro_rect = string_rendered1.get_rect()
-        text_coord = 500
+        text_coord = 550
         intro_rect.top = text_coord
-        intro_rect.x = 20
+        intro_rect.x = 40
         text_coord += intro_rect.height
         screen.blit(string_rendered1, intro_rect)
 
@@ -153,10 +167,10 @@ def end_screen():
 
     while True:
         pygame.display.set_caption('Космическая база. Рекорды')
-        fon = pygame.transform.scale(load_image('end_fon.png'), (width, height))
+        fon = pygame.transform.scale(load_image('end_fon.jpg'), (width, height))
         screen.blit(fon, (0, 0))
-        font = pygame.font.Font(font_file_name, 50)
-        text_coord = 250
+        font = pygame.font.Font(font_file_name, 30)
+        text_coord = 156
         for line in list_for_table:
             str_text_name, str_text_score = str(line[0]), str(line[1])
             name_string_rendered = font.render(str_text_name, 1, pygame.Color('red'))
@@ -166,8 +180,8 @@ def end_screen():
             text_coord += 10
             intro_rect0.top = text_coord
             intro_rect1.top = text_coord
-            intro_rect0.x = 100
-            intro_rect1.x = 600
+            intro_rect0.x = 300
+            intro_rect1.x = 700
             text_coord += intro_rect0.height
             screen.blit(name_string_rendered, intro_rect0)
             screen.blit(score_string_rendered, intro_rect1)
@@ -752,7 +766,7 @@ if __name__ == '__main__':
     flag_stop_score_time = False
 
     clock = pygame.time.Clock()
-    pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
+    pygame.display.set_caption('Космическая база.')
     size = width, height = 1200, 700
     screen = pygame.display.set_mode(size)
     player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
@@ -876,7 +890,7 @@ if __name__ == '__main__':
                         # и размеры
                         sprite_game_over.rect = sprite_game_over.image.get_rect()
                         sprite_game_over.rect.x = 50
-                        sprite_game_over.rect.y = 300
+                        sprite_game_over.rect.y = 200
                         # добавим спрайт в группу
                         game_over_group.add(sprite_game_over)
                         sound_game_over = 'data\game_over.mp3'
