@@ -35,8 +35,6 @@ def start_screen():
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
     need_input = True
-
-    font_file_name = 'data\conthrax-sb.ttf'
     while True:
         pygame.display.set_caption('Космическая база.')
         intro_text = ["Программа 'Перемещение героя'",
@@ -98,14 +96,12 @@ def start_screen():
 
 
 def end_screen():
-    print('input_name_player', input_name_player)
     sound_intro = 'data\end_sound.mp3'
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
     need_input = True
-    font_file_name = 'data\conthrax-sb.ttf'
     score_file_name = 'data\score.txt'
 
     with open(score_file_name, encoding='utf-8') as r_file:
@@ -245,64 +241,64 @@ def start_new_level(number_level):
 
 def info_line():
     fon = pygame.transform.scale(load_image('info_line_fon.png'), (1200, 50))
-    screen.blit(fon, (0, 800))
-    font = pygame.font.Font(None, 30)
-    bomb = pygame.transform.scale(load_image('bomb.png'), (30, 30))
-    screen.blit(bomb, (70, 810))
-    text_coord = 810
+    screen.blit(fon, (0, 650))
+    font = pygame.font.Font(font_file_name, 25)
+    bomb = pygame.transform.scale(load_image('bomb.png'), (40, 40))
+    screen.blit(bomb, (15, 655))
+    text_coord = 650
     string_rendered = font.render('(ctrl) Бомбы:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 100
+    intro_rect.x = 50
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
-    barrier = pygame.transform.scale(load_image('wall.png'), (30, 30))
-    screen.blit(barrier, (360, 810))
+    barrier = pygame.transform.scale(load_image('wall.png'), (35, 35))
+    screen.blit(barrier, (330, 657))
     string_rendered = font.render('(alt) Препятствия:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 400
+    intro_rect.x = 365
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
     string_rendered = font.render('Уровень:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 700
+    intro_rect.x = 750
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
     string_rendered = font.render('Баллы:', 1, pygame.Color('blue'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 1000
+    intro_rect.x = 970
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
 
 def info_line_update(wall_count, bomb_count, number_level):
-    text_coord = 805
-    font = pygame.font.Font(None, 40)
+    text_coord = 650
+    font = pygame.font.Font(font_file_name, 27)
 
     text_bomb_count = str(bomb_count)
     string_rendered = font.render(text_bomb_count, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 240
+    intro_rect.x = 260
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
     text_wall_count = str(wall_count)
     string_rendered = font.render(text_wall_count, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 590
+    intro_rect.x = 670
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
     text_number_level = str(number_level)
     string_rendered = font.render(text_number_level, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 800
+    intro_rect.x = 910
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
     text_score = str(score)
     string_rendered = font.render(text_score, 1, pygame.Color('red'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = 1100
+    intro_rect.x = 1090
     intro_rect.top = text_coord + 10
     screen.blit(string_rendered, intro_rect)
 
@@ -372,7 +368,7 @@ def load_level(filename):
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
-
+font_file_name = 'data\conthrax-sb.ttf'
 tile_images = {
     'wall': load_image('wall.png'),
     'empty': load_image('hex.png'),
@@ -726,7 +722,7 @@ if __name__ == '__main__':
     #     print('Неправильное имя файла, завершаем игру...')
     #     terminate()
     pygame.init()
-    size = width, height = 1200, 850
+    size = width, height = 1200, 700
     screen_rect = (0, 0, width, height)
     screen = pygame.display.set_mode(size)
     v = 50
@@ -757,7 +753,7 @@ if __name__ == '__main__':
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Перемещение героя. Дополнительные уровни')
-    size = width, height = 1200, 850
+    size = width, height = 1200, 700
     screen = pygame.display.set_mode(size)
     player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
     takt = 1
@@ -944,7 +940,7 @@ if __name__ == '__main__':
 
         if takt - takt_end_level > 70 and falg_end_level:
             pygame.init()
-            size = width, height = 1200, 850
+            size = width, height = 1200, 700
             screen_rect = (0, 0, width, height)
             screen = pygame.display.set_mode(size)
             v = 50

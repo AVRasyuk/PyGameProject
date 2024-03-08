@@ -1,1 +1,1 @@
-Name,Scoresasa,322Alexander,100sas,0sa,0
+Name,Score,145Alexander,100
