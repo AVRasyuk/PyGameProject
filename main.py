@@ -35,9 +35,7 @@ def start_screen():
     pygame.mixer.music.play()
     need_input = True
     input_name_player = ''
-
-    font_player = pygame.font.Font(None, 50)
-
+    font_file_name = 'data\conthrax-sb.ttf'
     while True:
         pygame.display.set_caption('Космическая база.')
         intro_text = ["Программа 'Перемещение героя'",
@@ -47,7 +45,8 @@ def start_screen():
                       ]
         fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
         screen.blit(fon, (0, 0))
-        font = pygame.font.Font(None, 30)
+
+        font = pygame.font.Font(font_file_name, 30)
         text_coord = 350
         for line in intro_text:
             string_rendered = font.render(line, 1, pygame.Color('red'))
@@ -57,7 +56,7 @@ def start_screen():
             intro_rect.x = 20
             text_coord += intro_rect.height
             screen.blit(string_rendered, intro_rect)
-        font_player_name = pygame.font.Font(None, 70)
+        font_player_name = pygame.font.Font(font_file_name, 70)
         string_rendered1 = font_player_name.render(input_name_player, 1, pygame.Color('red'))
         intro_rect = string_rendered1.get_rect()
         text_coord = 500
@@ -105,8 +104,7 @@ def end_screen():
     pygame.mixer.music.play()
     need_input = True
     input_name_player = ''
-
-    font_player = pygame.font.Font(None, 50)
+    font_file_name = 'data\conthrax-sb.ttf'
 
     with open("data\score.txt", encoding='utf-8') as r_file:
         # Создаем объект DictReader, указываем символ-разделитель ","
@@ -133,7 +131,7 @@ def end_screen():
         pygame.display.set_caption('Космическая база. Рекорды')
         fon = pygame.transform.scale(load_image('end_fon.png'), (width, height))
         screen.blit(fon, (0, 0))
-        font = pygame.font.Font(None, 100)
+        font = pygame.font.Font(font_file_name, 50)
         text_coord = 250
         for line in list_for_table:
             str_text_name, str_text_score = str(line[0]), str(line[1])
