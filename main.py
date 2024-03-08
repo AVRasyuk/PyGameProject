@@ -29,7 +29,7 @@ def start_screen():
     pygame.mixer.music.play()
     need_input = True
     while True:
-        pygame.display.set_caption('Космическая база.')
+        pygame.display.set_caption('Космическая база. AVRasyuk game.')
         intro_text = ["Задача игрока управляя стрелками на клавиатуре Зеленым Роботом ",
                       "недопусить захвата центрального компьютера Красным Роботом.",
                       "Игрок может установить на пути Красного Робота",
@@ -48,6 +48,9 @@ def start_screen():
                       "Для загрузки уровня введите Имя Игрока и нажмите Enter",
                       " ",
                       ">",
+                      " ",
+                      " ",
+                      "Проект PyGame 2024, автор Расюк Александр Викторович"
                       ]
         fon = pygame.transform.scale(load_image('start_fon.jpg'), (width, height))
         screen.blit(fon, (0, 0))
