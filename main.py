@@ -103,16 +103,12 @@ def end_screen():
     with open(score_file_name, encoding='utf-8') as r_file:
         file_reader = csv.DictReader(r_file, delimiter=",")
         count = 0
-        print(file_reader)
         list_for_table = []
         for row in file_reader:
             if count == 0:
-                print(f'Файл содержит столбцы: {", ".join(row)}')
-            print(f' {row["Name"]} - {row["Score"]}')
+                pass
             list_for_table.append([row["Name"], int(row["Score"])])
-            print(list_for_table)
             count += 1
-        print(f'Всего в файле {count + 1} строк.')
         find = 0
         for i in range(len(list_for_table)):
             if list_for_table[i][0] == input_name_player:
@@ -122,7 +118,6 @@ def end_screen():
         if not find:
             list_for_table.append([input_name_player, summ_score])
         list_for_table.sort(key=lambda x: [x[1], x[0]], reverse=1)
-        print(list_for_table)
     summ_score = 0
     count = 0
     with open(score_file_name, mode="w", encoding='utf-8') as w_file:
@@ -295,9 +290,7 @@ def load_level(filename):
     global x_point_hero, y_point_hero, digit_map, bad_robot_map, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp
     max_width = max(map(len, level_map))
     max_height = len(level_map)
-    print(max_width, max_height)
     load_map = list(map(lambda x: x.ljust(max_width, '.'), level_map))
-    print(load_map)
     digit_map = [[0] * (max_width) for _ in range(max_height)]
     bad_robot_map = [[0] * (max_width) for _ in range(max_height)]
     for j in range(max_width):
@@ -313,7 +306,6 @@ def load_level(filename):
                 bad_robot_map[i][j] = 0
                 x_point_hero = j
                 y_point_hero = i
-                print('позиция героя из файла', x_point_hero, y_point_hero)
             elif load_map[i][j] == 'C':
                 digit_map[i][j] = 7
                 bad_robot_map[i][j] = 0
@@ -403,9 +395,7 @@ class BadRobot(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update_broken_barrier(self, takt):
-        print('update_broken_barrier', takt)
         self.cur_frame = takt
-        print(self.cur_frame)
         self.image = self.frames[self.cur_frame]
 
 
@@ -435,7 +425,6 @@ class ToolBox(pygame.sprite.Sprite):
 
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        # print(pos_x, pos_y)
         super().__init__(bomb_group, all_sprites)
         self.add(bomb_group)
         self.image = bomb_image
@@ -446,13 +435,11 @@ class Barrier(pygame.sprite.Sprite):
     barrier_boom_image = load_image('boom.png')
 
     def __init__(self, pos_x, pos_y):
-        print(pos_x, pos_y)
         super().__init__(barrier_group, all_sprites)
         self.image = barrier_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 0, tile_height * pos_y + 0)
 
     def delite_barrier(self):
-        # if self.rect.x == x_step_bad_robot * tile_width and self.rect.y == y_step_bad_robot * tile_height:
         self.image = self.barrier_boom_image
 
 
@@ -476,9 +463,7 @@ class BrokenBarrier(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update_broken_barrier(self, takt):
-        print('update_broken_barrier', takt)
         self.cur_frame = takt
-        print(self.cur_frame)
         self.image = self.frames[self.cur_frame]
 
 
@@ -510,7 +495,6 @@ def create_detonation(position):
 
 
 def check_step_set_hero(direction, install='еmpty'):
-    print('вызов check_step_set_bomb ')
     if direction == 'L':
         delta_x, delta_y = -1, 0
     elif direction == 'R':
@@ -521,8 +505,6 @@ def check_step_set_hero(direction, install='еmpty'):
         delta_x, delta_y = 0, 1
 
     global x_point_hero, y_point_hero, digit_map, bad_robot_map, bomb_count, barrier_count
-    print('шаг стрелкой', x_point_hero, y_point_hero)
-    # print(digit_map)
     if 0 <= (y_point_hero + delta_y) < len(digit_map) and 0 <= (x_point_hero + delta_x) < len(digit_map[0]):
         if digit_map[y_point_hero + delta_y][x_point_hero + delta_x] == 4:
             tool_box_group.empty()
@@ -530,7 +512,6 @@ def check_step_set_hero(direction, install='еmpty'):
             digit_map[y_point_hero][x_point_hero] = 0
             x_point_hero += delta_x
             y_point_hero += delta_y
-            print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
             bad_robot_map[y_point_hero][x_point_hero] = 0
             return True
@@ -540,7 +521,6 @@ def check_step_set_hero(direction, install='еmpty'):
             digit_map[y_point_hero][x_point_hero] = 0
             x_point_hero += delta_x
             y_point_hero += delta_y
-            print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
             bad_robot_map[y_point_hero][x_point_hero] = 0
             return True
@@ -570,7 +550,6 @@ def check_step_set_hero(direction, install='еmpty'):
 
             x_point_hero += delta_x
             y_point_hero += delta_y
-            print('после шага', x_point_hero, y_point_hero)
             digit_map[y_point_hero][x_point_hero] = 5
             bad_robot_map[y_point_hero][x_point_hero] = 0
             return True
@@ -586,7 +565,6 @@ def generate_level(level):
                 Tile('wall', x, y)
             elif level[y][x] == '@':
                 Tile('empty', x, y)
-                print(x, y)
                 new_player = Player(x, y)
             elif level[y][x] == 'C':
                 Tile('comp', x, y)
@@ -622,7 +600,6 @@ def get_distance(start_x_point, start_y_point):
                     continue
                 if x + dx < 0 or x + dx >= max_width or y + dy < 0 or y + dy >= max_height:
                     continue
-                # print(y + dy, x + dx)
                 if bad_robot_map[y + dy][x + dx] == 0:
                     dn = d.get((x + dx, y + dy), -1)
                     if dn == -1:
@@ -735,25 +712,21 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
-                    print('нажата LEFT + CTRL')
                     if check_step_set_hero('L', 'bomb'):
                         player.rect.x -= step_hero
                 elif event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_ALT:
                     if check_step_set_hero('L', 'barrier'):
                         player.rect.x -= step_hero
                 elif event.key == pygame.K_LEFT:
-                    print('нажата LEFT')
                     if check_step_set_hero('L'):
                         player.rect.x -= step_hero
                 if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
-                    print('нажата R + CTRL')
                     if check_step_set_hero('R', 'bomb'):
                         player.rect.x += step_hero
                 elif event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_ALT:
                     if check_step_set_hero('R', 'barrier'):
                         player.rect.x += step_hero
                 elif event.key == pygame.K_RIGHT:
-                    print('нажата R')
                     if check_step_set_hero('R'):
                         player.rect.x += step_hero
                 if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_LCTRL:
@@ -819,9 +792,8 @@ if __name__ == '__main__':
                         flag_stop_score_time = True
                         summ_score += score
                     if len(bad_robot_move_path) == 0:
-                        print('GAME OVER!')
+                        pass
                 else:
-                    print('Bad Robot STOP - ', bad_robot_stop_takt)
                     if bad_robot_stop_takt == 0:
                         broken_barrier = BrokenBarrier(x_step_bad_robot, y_step_bad_robot)
                         bad_robot_stop_takt += 1
