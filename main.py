@@ -12,13 +12,6 @@ def load_image(name, colorkey=None):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     image = pygame.image.load(fullname)
-    # if colorkey is not None:
-    #     image = image.convert()
-    #     if colorkey == -1:
-    #         colorkey = image.get_at((0, 0))
-    #     image.set_colorkey(colorkey)
-    # else:
-    #     image = image.convert_alpha()
     return image
 
 
@@ -84,7 +77,7 @@ def start_screen():
                 terminate()
             elif event.type == pygame.KEYDOWN and need_input:
                 if event.key == pygame.K_RETURN and need_input:
-                    if input_name_player !='':
+                    if input_name_player != '':
                         need_input = False
 
                         return  # начинаем игру
@@ -94,19 +87,7 @@ def start_screen():
                 else:
                     if len(input_name_player) < 15:
                         input_name_player += event.unicode
-
-            # elif event.type == pygame.KEYDOWN and need_input:
-            #     if event.key == pygame.K_RETURN and need_input:
-            #         need_input = False
-            #         input_name_player = ''
-            #     elif event.key == pygame.K_BACKSPACE:
-            #         pass
-            #     else:
-            #         # input_name_player += event.unicode
-            #         intro_text += event.unicode
-
         pygame.display.flip()
-
         clock.tick(FPS)
 
 
@@ -117,7 +98,6 @@ def end_screen():
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
-    need_input = True
     score_file_name = 'data\score.txt'
 
     with open(score_file_name, encoding='utf-8') as r_file:
@@ -127,9 +107,7 @@ def end_screen():
         list_for_table = []
         for row in file_reader:
             if count == 0:
-                # Вывод строки, содержащей заголовки для столбцов
                 print(f'Файл содержит столбцы: {", ".join(row)}')
-            # Вывод строк
             print(f' {row["Name"]} - {row["Score"]}')
             list_for_table.append([row["Name"], int(row["Score"])])
             print(list_for_table)
@@ -163,7 +141,7 @@ def end_screen():
         text_coord = 156
         for i in range(10 if len(list_for_table) > 10 else len(list_for_table)):
             line = list_for_table[i]
-            str_text_num, str_text_name, str_text_score = str(i+1), str(line[0]), str(line[1])
+            str_text_num, str_text_name, str_text_score = str(i + 1), str(line[0]), str(line[1])
             num_string_rendered = font.render(str_text_num, 1, pygame.Color('blue'))
             intro_rect = num_string_rendered.get_rect()
             name_string_rendered = font.render(str_text_name, 1, pygame.Color('red'))
@@ -226,7 +204,6 @@ def reset_level():
     takt = 1
     takt_bad_robot = 0
     takt_end_level = 0
-
 
 
 def game_over():
@@ -313,12 +290,9 @@ def load_level(filename):
     pygame.mixer.music.play()
     global max_width, max_height
     filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
-        # print(level_map)
     global x_point_hero, y_point_hero, digit_map, bad_robot_map, x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp
-    # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
     max_height = len(level_map)
     print(max_width, max_height)
@@ -326,8 +300,6 @@ def load_level(filename):
     print(load_map)
     digit_map = [[0] * (max_width) for _ in range(max_height)]
     bad_robot_map = [[0] * (max_width) for _ in range(max_height)]
-    # print(digit_map)
-
     for j in range(max_width):
         for i in range(max_height):
             if load_map[i][j] == '.':
@@ -362,12 +334,6 @@ def load_level(filename):
                 bad_robot_map[i][j] = 1
                 x_point_tool_box = j
                 y_point_tool_box = i
-
-    # print(x_point_hero, y_point_hero)
-    # print(digit_map)
-    # print(digit_map)
-    # print(load_map)
-    # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
@@ -378,7 +344,6 @@ tile_images = {
     'comp': load_image('comp.png'),
     'box_bomb': load_image('box_bomb.png'),
     'tool_box': load_image('tool_box.png'),
-    # 'bomb_image': load_image('bomb.png'),
 }
 computer_image = load_image('comp.png')
 player_image = load_image('hero.png')
@@ -635,27 +600,18 @@ def generate_level(level):
                 new_bad_robot = BadRobot(x, y)
             elif level[y][x] == 'T':
                 Tile('empty', x, y)
-                # new_tool_box = ToolBox(x, y)
-                # all_sprites.add(new_tool_box)
-                # all_sprites.add(ToolBox(x, y))
                 tool_box_group.add(ToolBox(x, y))
-
-    # вернем игрока, а также размер поля в клетках
     return new_player, new_bad_robot, x, y
 
 
 def has_path(x1, y1, x2, y2):
     d = get_distance(x1, y1)
-    # print('дистанция в has_path', d)
     dist = d.get((x2, y2), -1)
     return dist >= 0
 
 
 def get_distance(start_x_point, start_y_point):
     global max_width, max_height, bad_robot_map
-    # print('bad robot map', bad_robot_map)
-    # print('ширина высота поля', max_width, max_height)
-
     v = [(start_x_point, start_y_point)]
     d = {(start_x_point, start_y_point): 0}
     while len(v) > 0:
@@ -672,7 +628,6 @@ def get_distance(start_x_point, start_y_point):
                     if dn == -1:
                         d[(x + dx, y + dy)] = d[(x, y)] + 1
                         v.append((x + dx, y + dy))
-    # print('дистанция - ', d)
     return d
 
 
@@ -697,12 +652,12 @@ def get_path(x1, y1, x2, y2):
     path.reverse()
     bad_robot_move_path = path[:]
     bad_robot_move_path.pop(0)
-    # print('путь выхода - ', path)
     if len(path) > 1:
         pass
-        # self.start_draw_path_ball = True
 
     return path[:]
+
+
 def picture_game_over_you_win(num_picture):
     sprite_picture = pygame.sprite.Sprite()
     if num_picture:
@@ -711,16 +666,15 @@ def picture_game_over_you_win(num_picture):
     else:
         sprite_picture.image = load_image("game_over.png")
         sound_final = 'data\game_over.mp3'
-    # и размеры
     sprite_picture.rect = sprite_picture.image.get_rect()
     sprite_picture.rect.x = 50
     sprite_picture.rect.y = 200
-    # добавим спрайт в группу
     game_over_group.add(sprite_picture)
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(sound_final)
     pygame.mixer.music.play()
+
 
 FPS = 50
 x_point_hero = 0
@@ -732,15 +686,6 @@ bad_robot_map, digit_map = [[]], [[]]
 clock = pygame.time.Clock()
 
 if __name__ == '__main__':
-    # # global file_name_level
-    # print('Введите имя файла уровня map1.txt, map2.txt, map3.txt:')
-    # file_name_level = input()
-    # if (file_name_level == 'map1.txt' or file_name_level == 'map2.txt'
-    #         or file_name_level == 'map3.txt'):
-    #     print('Начинаем игру!')
-    # else:
-    #     print('Неправильное имя файла, завершаем игру...')
-    #     terminate()
     pygame.init()
     size = width, height = 1200, 700
     screen_rect = (0, 0, width, height)
@@ -749,9 +694,7 @@ if __name__ == '__main__':
     fps = 20
     start_screen()
     info_line()
-    # основной персонаж
     player = None
-    # группы спрайтов
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
@@ -790,9 +733,7 @@ if __name__ == '__main__':
         screen.fill((0, 0, 0))
         info_line()
         for event in pygame.event.get():
-
             if event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_LEFT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата LEFT + CTRL')
                     if check_step_set_hero('L', 'bomb'):
@@ -804,7 +745,6 @@ if __name__ == '__main__':
                     print('нажата LEFT')
                     if check_step_set_hero('L'):
                         player.rect.x -= step_hero
-
                 if event.key == pygame.K_RIGHT and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                     print('нажата R + CTRL')
                     if check_step_set_hero('R', 'bomb'):
@@ -816,64 +756,35 @@ if __name__ == '__main__':
                     print('нажата R')
                     if check_step_set_hero('R'):
                         player.rect.x += step_hero
-
                 if event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_LCTRL:
-                    print('нажата UP + CTRL')
                     if check_step_set_hero('U', 'bomb'):
                         player.rect.y -= step_hero
                 elif event.key == pygame.K_UP and pygame.key.get_mods() & pygame.KMOD_ALT:
                     if check_step_set_hero('U', 'barrier'):
                         player.rect.y -= step_hero
                 elif event.key == pygame.K_UP:
-                    print('нажата UP')
                     if check_step_set_hero('U'):
                         player.rect.y -= step_hero
-
                 if event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_LCTRL:
-                    print('нажата DOWN + CTRL')
                     if check_step_set_hero('D', 'bomb'):
                         player.rect.y += step_hero
                 elif event.key == pygame.K_DOWN and pygame.key.get_mods() & pygame.KMOD_ALT:
                     if check_step_set_hero('D', 'barrier'):
                         player.rect.y += step_hero
                 elif event.key == pygame.K_DOWN:
-                    print('нажата DOWN')
                     if check_step_set_hero('D'):
                         player.rect.y += step_hero
-
                 if event.key == pygame.K_d:
-                    print('нажата клавиша d')
-                    # all_sprites.remove(new_tool_box)
-                    # tool_box_group.remove(new_tool_box)
-                    print(tool_box_group)
                     tool_box_group.empty()
-                    print(tool_box_group)
-                    # all_sprites.remove(sprite)
-                    # new_tool_box.kill
-
                 player_group.draw(screen)
                 bomb_group.draw(screen)
                 barrier_group.draw(screen)
 
             if event.type == pygame.QUIT:
                 running = False
-
-        # if start_find_path:
-        # print(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
-        # print(has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp))
         if takt - takt_bad_robot > 20 and flag_movie_bad_robot:
-            # bad_robot_move_path = []
             if has_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp):
                 path = get_path(x_point_bad_robot, y_point_bad_robot, x_point_comp, y_point_comp)
-
-                # for step in path[1:]:
-                #     for j in range(max_height):
-                #         for i in range(max_width):
-                #             x_step, y_step = step
-                #             if x_step == i and y_step == j:
-                #                 pass
-                #                 # Bomb(i,j)
-
             if len(bad_robot_move_path) > 0:
                 x_step_bad_robot, y_step_bad_robot = bad_robot_move_path[0]
                 if bad_robot_map[y_step_bad_robot][x_step_bad_robot] == 0:
@@ -881,17 +792,13 @@ if __name__ == '__main__':
                     x_step_bad_robot, y_step_bad_robot = bad_robot_move_path.pop(0)
                     bad_robot_map[y_step_bad_robot][x_step_bad_robot] = 6
                     digit_map[y_step_bad_robot][x_step_bad_robot] = 6
-                    # print('bad robot coord: ', x_point_bad_robot, y_point_bad_robot)
-                    # print(bad_robot_map)
                     bad_robot_map[y_point_bad_robot][x_point_bad_robot] = 0
                     digit_map[y_point_bad_robot][x_point_bad_robot] = 0
                     x_point_bad_robot, y_point_bad_robot = x_step_bad_robot, y_step_bad_robot
                     bad_robot.rect.x = x_point_bad_robot * tile_width
                     bad_robot.rect.y = y_point_bad_robot * tile_height
-
                     if pygame.sprite.spritecollideany(bad_robot, player_group) or pygame.sprite.spritecollideany(
                             bad_robot, computer_group):
-                        # GAME OVER
                         picture_game_over_you_win(0)
                         flag_movie_bad_robot = False
                         falg_end_level = False
@@ -899,29 +806,20 @@ if __name__ == '__main__':
                         takt_end_level = takt
                         flag_stop_score_time = True
                         score = 0
-
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
                         flag_exploded_bad_robot = True
                         flag_movie_bad_robot = False
                         position_boom = bad_robot.rect.x, bad_robot.rect.y
                         create_detonation(position_boom)
-                        # number_level += 1
                         if number_level == max_level:
                             picture_game_over_you_win(1)
                         takt_end_level = takt
-                        # flag_movie_bad_robot = True
                         falg_end_level = True
                         flag_stop_score_time = True
                         summ_score += score
-
-
                     if len(bad_robot_move_path) == 0:
                         print('GAME OVER!')
-
-                        # x_point_bad_robot, y_point_bad_robot = x, y
-                        # self.start_move_ball = False
-                # self.ticks = 0
                 else:
                     print('Bad Robot STOP - ', bad_robot_stop_takt)
                     if bad_robot_stop_takt == 0:
@@ -975,15 +873,12 @@ if __name__ == '__main__':
                 falg_end_level = False
                 score = 0
 
-
         if takt - takt_end_level > 70 and flag_game_over:
             game_over()
             number_level = 1
             player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
             flag_game_over = False
             flag_movie_bad_robot = True
-
-        # print(path)
         info_line_update(barrier_count, bomb_count, number_level)
         all_sprites.draw(screen)
         all_sprites.update()
@@ -999,9 +894,7 @@ if __name__ == '__main__':
         pygame.display.flip()
         takt += 1
         if not flag_stop_score_time:
-            # score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
             score = int((500 / takt) * 10)
         if takt > 10000:
             takt = 0
-
     pygame.quit()
