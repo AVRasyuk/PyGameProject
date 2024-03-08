@@ -171,20 +171,26 @@ def end_screen():
         screen.blit(fon, (0, 0))
         font = pygame.font.Font(font_file_name, 30)
         text_coord = 156
-        for line in list_for_table:
-            str_text_name, str_text_score = str(line[0]), str(line[1])
+        for i in range(10 if len(list_for_table) > 10 else len(list_for_table)):
+            line = list_for_table[i]
+            str_text_num, str_text_name, str_text_score = str(i+1), str(line[0]), str(line[1])
+            num_string_rendered = font.render(str_text_num, 1, pygame.Color('blue'))
+            intro_rect = num_string_rendered.get_rect()
             name_string_rendered = font.render(str_text_name, 1, pygame.Color('red'))
-            intro_rect0 = name_string_rendered.get_rect()
+            intro_rect1 = name_string_rendered.get_rect()
             score_string_rendered = font.render(str_text_score, 1, pygame.Color('red'))
-            intro_rect1 = score_string_rendered.get_rect()
+            intro_rect2 = score_string_rendered.get_rect()
             text_coord += 10
-            intro_rect0.top = text_coord
+            intro_rect.top = text_coord
             intro_rect1.top = text_coord
-            intro_rect0.x = 300
-            intro_rect1.x = 700
-            text_coord += intro_rect0.height
-            screen.blit(name_string_rendered, intro_rect0)
-            screen.blit(score_string_rendered, intro_rect1)
+            intro_rect2.top = text_coord
+            intro_rect.x = 250
+            intro_rect1.x = 300
+            intro_rect2.x = 700
+            text_coord += intro_rect.height
+            screen.blit(num_string_rendered, intro_rect)
+            screen.blit(name_string_rendered, intro_rect1)
+            screen.blit(score_string_rendered, intro_rect2)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -381,6 +387,7 @@ def load_level(filename):
     # print(load_map)
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
 
 font_file_name = 'data\conthrax-sb.ttf'
 tile_images = {
@@ -992,7 +999,7 @@ if __name__ == '__main__':
         pygame.display.flip()
         takt += 1
         if not flag_stop_score_time:
-            #score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
+            # score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
             score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
         if takt > 10000:
             takt = 0
