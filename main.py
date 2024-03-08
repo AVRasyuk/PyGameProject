@@ -28,13 +28,14 @@ def terminate():
 
 
 def start_screen():
+    global input_name_player
     sound_intro = 'data\start_sound.mp3'
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
     need_input = True
-    input_name_player = ''
+
     font_file_name = 'data\conthrax-sb.ttf'
     while True:
         pygame.display.set_caption('Космическая база.')
@@ -72,7 +73,7 @@ def start_screen():
             elif event.type == pygame.KEYDOWN and need_input:
                 if event.key == pygame.K_RETURN and need_input:
                     need_input = False
-                    input_name_player = ''
+                    # input_name_player = ''
                     return  # начинаем игру
 
                 elif event.key == pygame.K_BACKSPACE:
@@ -97,21 +98,19 @@ def start_screen():
 
 
 def end_screen():
+    print('input_name_player', input_name_player)
     sound_intro = 'data\end_sound.mp3'
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(sound_intro)
     pygame.mixer.music.play()
     need_input = True
-    input_name_player = ''
     font_file_name = 'data\conthrax-sb.ttf'
+    score_file_name = 'data\score.txt'
 
-    with open("data\score.txt", encoding='utf-8') as r_file:
-        # Создаем объект DictReader, указываем символ-разделитель ","
+    with open(score_file_name, encoding='utf-8') as r_file:
         file_reader = csv.DictReader(r_file, delimiter=",")
-        # Счетчик для подсчета количества строк и вывода заголовков столбцов
         count = 0
-        # Считывание данных из CSV файла
         print(file_reader)
         list_for_table = []
         for row in file_reader:
@@ -120,12 +119,41 @@ def end_screen():
                 print(f'Файл содержит столбцы: {", ".join(row)}')
             # Вывод строк
             print(f' {row["Name"]} - {row["Score"]}')
-            list_for_table.append([row["Name"], row["Score"]])
+            list_for_table.append([row["Name"], int(row["Score"])])
             print(list_for_table)
             count += 1
         print(f'Всего в файле {count + 1} строк.')
+        find = 0
+        for i in range(len(list_for_table)):
+            if list_for_table[i][0] == input_name_player:
+                find = 1
+                if list_for_table[i][1] < score:
+                    list_for_table[i][1] = score
+        if not find:
+            list_for_table.append([input_name_player, score])
+
+        # find = 0
+        # for i in range(len(list_for_table)):
+        #     if list_for_table[i][0] == input_name_player and list_for_table[i][1] < score:
+        #         del list_for_table[i]
+        #         list_for_table.append([input_name_player, score])
+        #         find = 1
+        #     elif list_for_table[i][0] == input_name_player and list_for_table[i][1] >= score:
+        #         find = 1
+        # if find == 0:
+        #     list_for_table.append([input_name_player, score])
+
         list_for_table.sort(key=lambda x: [x[1], x[0]], reverse=1)
         print(list_for_table)
+
+    count = 0
+    with open(score_file_name, mode="w", encoding='utf-8') as w_file:
+        header_names = ["Name", "Score"]
+        file_writer = csv.DictWriter(w_file, delimiter=",",
+                                     lineterminator="\r", fieldnames=header_names)
+        file_writer.writeheader()
+        for row in list_for_table:
+            file_writer.writerow({"Name": row[0], "Score": row[1]})
 
     while True:
         pygame.display.set_caption('Космическая база. Рекорды')
@@ -183,7 +211,7 @@ def reset_level():
     detonation_group.empty()
     game_over_group.empty()
     takt = 0
-    flag_stop_score_time = True
+    flag_stop_score_time = False
     flag_movie_bad_robot = True
     flag_exploded_bad_robot = False
     falg_end_level = False
@@ -364,6 +392,7 @@ image_boom = load_image('boom.png')
 broken_barrier_sheet = load_image('broken_barrier_sheet.png')
 bad_robot_sheet = load_image('bad_robot_sheet.png')
 tile_width = tile_height = step_hero = 50
+input_name_player = ''
 
 
 class Tile(pygame.sprite.Sprite):
@@ -863,6 +892,8 @@ if __name__ == '__main__':
                         falg_end_level = False
                         flag_game_over = True
                         takt_end_level = takt
+                        if number_level == 1:
+                            score = 0
 
                     if pygame.sprite.spritecollideany(bad_robot, bomb_group):
                         bad_robot.boom()
@@ -951,6 +982,7 @@ if __name__ == '__main__':
         pygame.display.flip()
         takt += 1
         if not flag_stop_score_time:
+            #score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
             score = int((500 / takt) * (bomb_count / 5) * (barrier_count / 20) * 100)
         if takt > 10000:
             takt = 0

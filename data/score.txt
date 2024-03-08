@@ -1,4 +1,1 @@
-Name,Score
-Alexabder,100
-Marina,150
-Svetlana,200
+Name,Scoresasa,322Alexander,100sas,0sa,0
