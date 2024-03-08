@@ -215,6 +215,7 @@ def reset_level():
     bad_robot_group.empty()
     detonation_group.empty()
     game_over_group.empty()
+    computer_group.empty()
     takt = 0
     flag_stop_score_time = False
     flag_movie_bad_robot = True
@@ -713,7 +714,7 @@ def picture_game_over_you_win(num_picture):
     # определим его вид
     sprite_picture.image = load_image("game_over.png")
     # и размеры
-    sprite_picture.rect = sprite_game_over.image.get_rect()
+    sprite_picture.rect = sprite_picture.image.get_rect()
     sprite_picture.rect.x = 50
     sprite_picture.rect.y = 200
     # добавим спрайт в группу
@@ -892,20 +893,7 @@ if __name__ == '__main__':
                     if pygame.sprite.spritecollideany(bad_robot, player_group) or pygame.sprite.spritecollideany(
                             bad_robot, computer_group):
                         # GAME OVER
-                        sprite_game_over = pygame.sprite.Sprite()
-                        # определим его вид
-                        sprite_game_over.image = load_image("game_over.png")
-                        # и размеры
-                        sprite_game_over.rect = sprite_game_over.image.get_rect()
-                        sprite_game_over.rect.x = 50
-                        sprite_game_over.rect.y = 200
-                        # добавим спрайт в группу
-                        game_over_group.add(sprite_game_over)
-                        sound_game_over = 'data\game_over.mp3'
-                        pygame.init()
-                        pygame.mixer.init()
-                        pygame.mixer.music.load(sound_game_over)
-                        pygame.mixer.music.play()
+                        picture_game_over_you_win(0)
                         flag_movie_bad_robot = False
                         falg_end_level = False
                         flag_game_over = True
@@ -975,7 +963,7 @@ if __name__ == '__main__':
             screen = pygame.display.set_mode(size)
             number_level += 1
             if number_level == 5:
-                you_win()
+                picture_game_over_you_win(1)
             player, bad_robot, level_x, level_y = generate_level(
                 load_level(start_new_level(number_level)))
             flag_movie_bad_robot = True
