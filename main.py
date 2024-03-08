@@ -84,9 +84,10 @@ def start_screen():
                 terminate()
             elif event.type == pygame.KEYDOWN and need_input:
                 if event.key == pygame.K_RETURN and need_input:
-                    need_input = False
-                    # input_name_player = ''
-                    return  # начинаем игру
+                    if input_name_player !='':
+                        need_input = False
+
+                        return  # начинаем игру
 
                 elif event.key == pygame.K_BACKSPACE:
                     input_name_player = input_name_player[:-1]
@@ -770,6 +771,7 @@ if __name__ == '__main__':
     falg_end_level = False
     flag_game_over = False
     flag_stop_score_time = False
+    max_level = 5
 
     clock = pygame.time.Clock()
     pygame.display.set_caption('Космическая база.')
@@ -905,6 +907,8 @@ if __name__ == '__main__':
                         position_boom = bad_robot.rect.x, bad_robot.rect.y
                         create_detonation(position_boom)
                         # number_level += 1
+                        if number_level == max_level:
+                            picture_game_over_you_win(1)
                         takt_end_level = takt
                         # flag_movie_bad_robot = True
                         falg_end_level = True
@@ -958,8 +962,8 @@ if __name__ == '__main__':
             reset_level()
             player = None
             screen = pygame.display.set_mode(size)
-            if number_level == 2:
-                picture_game_over_you_win(1)
+            if number_level == max_level:
+                game_over()
                 number_level = 1
                 player, bad_robot, level_x, level_y = generate_level(load_level(start_new_level(number_level)))
                 flag_game_over = False
